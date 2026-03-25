@@ -17,7 +17,7 @@ with open("src/template_columns.json", "r") as f:
     TEMPLATE_COLUMNS = json.load(f)
 
 # ===============================
-# App Config
+# FastAPI App
 # ===============================
 
 app = FastAPI(
@@ -26,6 +26,7 @@ app = FastAPI(
     version="2.0.0"
 )
 
+# ✅ IMPORTANT: Correct template setup (fixes your error)
 templates = Jinja2Templates(directory="templates")
 
 # ===============================
@@ -54,7 +55,7 @@ class AthleteInput(BaseModel):
     goal: Literal["bulk", "cut", "recomp", "maintenance"]
 
 # ===============================
-# Helper
+# Helper Function
 # ===============================
 
 def prepare_input(df_raw):
@@ -68,11 +69,15 @@ def prepare_input(df_raw):
 
 @app.get("/")
 def home(request: Request):
+    # ✅ This will render your UI
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "model": "loaded"}
+    return {
+        "status": "ok",
+        "model_loaded": True
+    }
 
 @app.post("/predict")
 def predict(data: AthleteInput):
