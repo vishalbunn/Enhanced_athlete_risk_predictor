@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 import joblib
 import pandas as pd
@@ -16,42 +17,44 @@ with open("src/template_columns.json", "r") as f:
     TEMPLATE_COLUMNS = json.load(f)
 
 # ===============================
-# App Metadata (Improved)
+# App Config
 # ===============================
 
 app = FastAPI(
     title="Enhanced Athlete Risk Predictor",
-    description="Enhancement-aware physiological health risk classification API using CatBoost",
-    version="1.0.0"
+    description="Advanced physiological health risk classification",
+    version="2.0.0"
 )
 
+templates = Jinja2Templates(directory="templates")
+
 # ===============================
-# Input Schema (Validated + Examples)
+# Input Schema
 # ===============================
 
 class AthleteInput(BaseModel):
-    age: int = Field(..., ge=18, le=60, example=29)
-    weight_kg: float = Field(..., example=88)
-    bf_percent: float = Field(..., ge=3, le=50, example=14)
-    training_vol_hr_wk: float = Field(..., example=14)
-    sleep_h: float = Field(..., ge=0, le=12, example=6)
-    testosterone_total: float = Field(..., example=1100)
-    estradiol: float = Field(..., example=40)
-    ALT: float = Field(..., example=55)
-    AST: float = Field(..., example=50)
-    HDL: float = Field(..., example=35)
-    LDL: float = Field(..., example=170)
-    hematocrit: float = Field(..., example=53)
-    creatinine: float = Field(..., example=1.35)
-    mood_score: float = Field(..., example=7)
-    libido_score: float = Field(..., example=9)
-    enhancement_load: float = Field(..., example=1.45)
-    sex: Literal["male", "female"] = Field(..., example="male")
-    status: Literal["off", "on", "pct", "cruise"] = Field(..., example="on")
-    goal: Literal["bulk", "cut", "recomp", "maintenance"] = Field(..., example="bulk")
+    age: int = Field(..., ge=18, le=60)
+    weight_kg: float
+    bf_percent: float
+    training_vol_hr_wk: float
+    sleep_h: float
+    testosterone_total: float
+    estradiol: float
+    ALT: float
+    AST: float
+    HDL: float
+    LDL: float
+    hematocrit: float
+    creatinine: float
+    mood_score: float
+    libido_score: float
+    enhancement_load: float
+    sex: Literal["male", "female"]
+    status: Literal["off", "on", "pct", "cruise"]
+    goal: Literal["bulk", "cut", "recomp", "maintenance"]
 
 # ===============================
-# Helper Function
+# Helper
 # ===============================
 
 def prepare_input(df_raw):
@@ -60,25 +63,16 @@ def prepare_input(df_raw):
     return df_enc.astype(float)
 
 # ===============================
-# Endpoints
+# Routes
 # ===============================
 
 @app.get("/")
-def home():
-    return {
-        "message": "Enhanced Athlete Risk Predictor API is running",
-        "version": "1.0.0",
-        "docs": "/docs"
-    }
+def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/health")
-def health_check():
-    return {
-        "status": "healthy",
-        "model_loaded": True,
-        "model_type": "CatBoost",
-        "version": "1.0.0"
-    }
+def health():
+    return {"status": "ok", "model": "loaded"}
 
 @app.post("/predict")
 def predict(data: AthleteInput):
@@ -90,13 +84,7 @@ def predict(data: AthleteInput):
     pred_label = le_risk.classes_[pred_idx]
 
     return {
-        "model": "CatBoost v1.0",
         "prediction": pred_label,
         "confidence": float(max(proba)),
-        "probabilities": dict(zip(le_risk.classes_, proba.tolist())),
-        "metadata": {
-            "framework": "CatBoost",
-            "deployment": "Render",
-            "version": "1.0.0"
-        }
+        "probabilities": dict(zip(le_risk.classes_, proba.tolist()))
     }
