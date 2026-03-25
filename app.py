@@ -1,5 +1,5 @@
-from fastapi import FastAPI, Request
-from fastapi.templating import Jinja2Templates
+from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 import joblib
 import pandas as pd
@@ -25,9 +25,6 @@ app = FastAPI(
     description="Advanced physiological health risk classification",
     version="2.0.0"
 )
-
-# ✅ IMPORTANT: Correct template setup (fixes your error)
-templates = Jinja2Templates(directory="templates")
 
 # ===============================
 # Input Schema
@@ -67,10 +64,11 @@ def prepare_input(df_raw):
 # Routes
 # ===============================
 
-@app.get("/")
-def home(request: Request):
-    # ✅ This will render your UI
-    return templates.TemplateResponse("index.html", {"request": request})
+# ✅ Serve UI directly (NO Jinja)
+@app.get("/", response_class=HTMLResponse)
+def home():
+    with open("templates/index.html", "r", encoding="utf-8") as f:
+        return f.read()
 
 @app.get("/health")
 def health():
