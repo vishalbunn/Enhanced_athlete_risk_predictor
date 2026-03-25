@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Athlete Risk Predictor</title>
+</head>
+<body style="font-family: Arial; text-align:center;">
+
+<h1>🏃 Athlete Risk Predictor</h1>
+
+<input id="age" placeholder="Age"><br><br>
+<input id="weight_kg" placeholder="Weight (kg)"><br><br>
+<input id="bf_percent" placeholder="Body Fat %"><br><br>
+<input id="training_vol_hr_wk" placeholder="Training Hours/Week"><br><br>
+<input id="sleep_h" placeholder="Sleep Hours"><br><br>
+<input id="testosterone_total" placeholder="Testosterone"><br><br>
+<input id="estradiol" placeholder="Estradiol"><br><br>
+<input id="ALT" placeholder="ALT"><br><br>
+<input id="AST" placeholder="AST"><br><br>
+<input id="HDL" placeholder="HDL"><br><br>
+<input id="LDL" placeholder="LDL"><br><br>
+<input id="hematocrit" placeholder="Hematocrit"><br><br>
+<input id="creatinine" placeholder="Creatinine"><br><br>
+<input id="mood_score" placeholder="Mood Score"><br><br>
+<input id="libido_score" placeholder="Libido Score"><br><br>
+<input id="enhancement_load" placeholder="Enhancement Load"><br><br>
+
+<select id="sex">
+  <option value="male">Male</option>
+  <option value="female">Female</option>
+</select><br><br>
+
+<select id="status">
+  <option value="off">Off</option>
+  <option value="on">On</option>
+  <option value="pct">PCT</option>
+  <option value="cruise">Cruise</option>
+</select><br><br>
+
+<select id="goal">
+  <option value="bulk">Bulk</option>
+  <option value="cut">Cut</option>
+  <option value="recomp">Recomp</option>
+  <option value="maintenance">Maintenance</option>
+</select><br><br>
+
+<button onclick="predict()">Predict</button>
+
+<h2 id="result"></h2>
+
+<script>
+async function predict() {
+  const res = await fetch("/predict", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      age: +age.value,
+      weight_kg: +weight_kg.value,
+      bf_percent: +bf_percent.value,
+      training_vol_hr_wk: +training_vol_hr_wk.value,
+      sleep_h: +sleep_h.value,
+      testosterone_total: +testosterone_total.value,
+      estradiol: +estradiol.value,
+      ALT: +ALT.value,
+      AST: +AST.value,
+      HDL: +HDL.value,
+      LDL: +LDL.value,
+      hematocrit: +hematocrit.value,
+      creatinine: +creatinine.value,
+      mood_score: +mood_score.value,
+      libido_score: +libido_score.value,
+      enhancement_load: +enhancement_load.value,
+      sex: sex.value,
+      status: status.value,
+      goal: goal.value
+    })
+  });
+
+  const data = await res.json();
+
+  result.innerText =
+    "Prediction: " + data.prediction +
+    " | Confidence: " + (data.confidence * 100).toFixed(2) + "%";
+}
+</script>
+
+</body>
+</html>
