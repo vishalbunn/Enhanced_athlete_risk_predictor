@@ -143,7 +143,7 @@ async function predict() {
     goal: goal.value
   };
 
-  const res = await fetch("/predict", {
+  const res = await fetch("https://enhanced-athlete-risk-predictor.onrender.com/predict", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify(data)
@@ -151,15 +151,9 @@ async function predict() {
 
   const out = await res.json();
 
-  let color = "low";
-  if (out.prediction.toLowerCase().includes("high")) color = "high";
-  else if (out.prediction.toLowerCase().includes("medium")) color = "medium";
-
-  document.getElementById("result").innerHTML =
-    `<span class="${color}">Risk: ${out.prediction}</span>`;
-
-  document.getElementById("confidence").innerText =
-    "Confidence: " + (out.confidence * 100).toFixed(2) + "%";
+  document.getElementById("result").innerText =
+    "Risk: " + out.prediction +
+    " | Confidence: " + (out.confidence * 100).toFixed(2) + "%";
 }
 </script>
 
