@@ -7,62 +7,91 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #0f172a, #1e293b);
+      background: radial-gradient(circle at top, #1e293b, #020617);
       color: white;
-      text-align: center;
     }
 
     h1 {
-      margin: 20px;
-      color: #38bdf8;
+      text-align: center;
+      margin-top: 30px;
+      font-size: 2.8rem;
+      background: linear-gradient(90deg, #38bdf8, #22c55e);
+      -webkit-background-clip: text;
+      color: transparent;
     }
 
-    .container {
-      max-width: 900px;
+    .wrapper {
+      max-width: 1100px;
       margin: auto;
       padding: 20px;
+    }
+
+    .grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.05);
+      padding: 15px;
+      border-radius: 14px;
+      backdrop-filter: blur(12px);
+      transition: 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      background: rgba(255,255,255,0.08);
+    }
+
+    label {
+      font-size: 0.85rem;
+      opacity: 0.7;
     }
 
     input, select {
+      width: 100%;
+      margin-top: 6px;
       padding: 10px;
       border-radius: 8px;
       border: none;
       outline: none;
-      background: rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.08);
       color: white;
     }
 
-    input::placeholder {
-      color: #cbd5f5;
+    input:focus, select:focus {
+      box-shadow: 0 0 10px #38bdf8;
     }
 
     button {
-      margin: 20px;
-      padding: 14px 30px;
-      border-radius: 10px;
+      display: block;
+      margin: 40px auto;
+      padding: 15px 40px;
+      border-radius: 12px;
       border: none;
-      background: #22c55e;
+      font-size: 1.2rem;
+      background: linear-gradient(135deg, #22c55e, #4ade80);
       color: white;
-      font-size: 1.1rem;
       cursor: pointer;
       transition: 0.3s;
     }
 
     button:hover {
-      background: #16a34a;
       transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(34,197,94,0.6);
     }
 
-    .card {
-      margin: 20px auto;
-      padding: 20px;
-      border-radius: 15px;
-      width: 300px;
-      background: rgba(255,255,255,0.08);
-      backdrop-filter: blur(10px);
+    .result-card {
+      text-align: center;
+      margin: auto;
+      width: 320px;
+      padding: 25px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
     }
 
     .low { color: #22c55e; }
@@ -80,82 +109,95 @@
 
 <h1>🏃 Athlete Risk Predictor</h1>
 
-<div class="container">
+<div class="wrapper">
 
-<input id="age" placeholder="Age">
-<input id="weight_kg" placeholder="Weight (kg)">
-<input id="bf_percent" placeholder="Body Fat %">
+<div class="grid">
 
-<input id="training_vol_hr_wk" placeholder="Training Hours">
-<input id="sleep_h" placeholder="Sleep Hours">
-<input id="testosterone_total" placeholder="Testosterone">
+<div class="card"><label>Age</label><input id="age"></div>
+<div class="card"><label>Weight</label><input id="weight_kg"></div>
+<div class="card"><label>Body Fat %</label><input id="bf_percent"></div>
 
-<input id="estradiol" placeholder="Estradiol">
-<input id="ALT" placeholder="ALT">
-<input id="AST" placeholder="AST">
+<div class="card"><label>Training Hours</label><input id="training_vol_hr_wk"></div>
+<div class="card"><label>Sleep Hours</label><input id="sleep_h"></div>
+<div class="card"><label>Testosterone</label><input id="testosterone_total"></div>
 
-<input id="HDL" placeholder="HDL">
-<input id="LDL" placeholder="LDL">
-<input id="hematocrit" placeholder="Hematocrit">
+<div class="card"><label>Estradiol</label><input id="estradiol"></div>
+<div class="card"><label>ALT</label><input id="ALT"></div>
+<div class="card"><label>AST</label><input id="AST"></div>
 
-<input id="creatinine" placeholder="Creatinine">
-<input id="mood_score" placeholder="Mood Score">
-<input id="libido_score" placeholder="Libido Score">
+<div class="card"><label>HDL</label><input id="HDL"></div>
+<div class="card"><label>LDL</label><input id="LDL"></div>
+<div class="card"><label>Hematocrit</label><input id="hematocrit"></div>
 
-<input id="enhancement_load" placeholder="Enhancement Load">
+<div class="card"><label>Creatinine</label><input id="creatinine"></div>
+<div class="card"><label>Mood</label><input id="mood_score"></div>
+<div class="card"><label>Libido</label><input id="libido_score"></div>
 
+<div class="card"><label>Enhancement Load</label><input id="enhancement_load"></div>
+
+<div class="card">
+<label>Sex</label>
 <select id="sex">
-  <option value="">Select Sex</option>
-  <option value="male">Male</option>
-  <option value="female">Female</option>
+<option value="">Select</option>
+<option value="male">Male</option>
+<option value="female">Female</option>
 </select>
+</div>
 
+<div class="card">
+<label>Status</label>
 <select id="status">
-  <option value="">Cycle Status</option>
-  <option value="off">Off</option>
-  <option value="on">On</option>
-  <option value="pct">PCT</option>
-  <option value="cruise">Cruise</option>
+<option value="">Select</option>
+<option value="off">Off</option>
+<option value="on">On</option>
+<option value="pct">PCT</option>
+<option value="cruise">Cruise</option>
 </select>
+</div>
 
+<div class="card">
+<label>Goal</label>
 <select id="goal">
-  <option value="">Goal</option>
-  <option value="bulk">Bulk</option>
-  <option value="cut">Cut</option>
-  <option value="recomp">Recomp</option>
-  <option value="maintenance">Maintenance</option>
+<option value="">Select</option>
+<option value="bulk">Bulk</option>
+<option value="cut">Cut</option>
+<option value="recomp">Recomp</option>
+<option value="maintenance">Maintenance</option>
 </select>
+</div>
 
 </div>
 
 <button onclick="predict()">🚀 Analyze Risk</button>
 
-<div class="card">
+<div class="result-card">
   <h2 id="result">Result will appear here</h2>
   <p id="confidence"></p>
-  <p class="error" id="error"></p>
+  <p id="error" class="error"></p>
+</div>
+
 </div>
 
 <script>
 async function predict() {
 
   const data = {
-    age: Number(age.value),
-    weight_kg: Number(weight_kg.value),
-    bf_percent: Number(bf_percent.value),
-    training_vol_hr_wk: Number(training_vol_hr_wk.value),
-    sleep_h: Number(sleep_h.value),
-    testosterone_total: Number(testosterone_total.value),
-    estradiol: Number(estradiol.value),
-    ALT: Number(ALT.value),
-    AST: Number(AST.value),
-    HDL: Number(HDL.value),
-    LDL: Number(LDL.value),
-    hematocrit: Number(hematocrit.value),
-    creatinine: Number(creatinine.value),
-    mood_score: Number(mood_score.value),
-    libido_score: Number(libido_score.value),
-    enhancement_load: Number(enhancement_load.value),
+    age: parseInt(age.value),
+    weight_kg: parseFloat(weight_kg.value),
+    bf_percent: parseFloat(bf_percent.value),
+    training_vol_hr_wk: parseFloat(training_vol_hr_wk.value),
+    sleep_h: parseFloat(sleep_h.value),
+    testosterone_total: parseFloat(testosterone_total.value),
+    estradiol: parseFloat(estradiol.value),
+    ALT: parseFloat(ALT.value),
+    AST: parseFloat(AST.value),
+    HDL: parseFloat(HDL.value),
+    LDL: parseFloat(LDL.value),
+    hematocrit: parseFloat(hematocrit.value),
+    creatinine: parseFloat(creatinine.value),
+    mood_score: parseFloat(mood_score.value),
+    libido_score: parseFloat(libido_score.value),
+    enhancement_load: parseFloat(enhancement_load.value),
     sex: sex.value,
     status: status.value,
     goal: goal.value
@@ -163,41 +205,34 @@ async function predict() {
 
   error.innerText = "";
 
-  // Validation
   for (let key in data) {
-    if (data[key] === "" || Number.isNaN(data[key])) {
-      error.innerText = "⚠️ Please fill all fields correctly";
+    if (data[key] === "" || isNaN(data[key]) && typeof data[key] === "number") {
+      error.innerText = "⚠️ Fill all fields correctly";
       return;
     }
   }
 
-  try {
-    const res = await fetch(window.location.origin + "/predict", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(data)
-    });
+  const res = await fetch(window.location.origin + "/predict", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(data)
+  });
 
-    const out = await res.json();
+  const out = await res.json();
 
-    if (!res.ok) {
-      error.innerText = "❌ Invalid input. Check values.";
-      console.log(out);
-      return;
-    }
-
-    let color = "low";
-    if (out.prediction.toLowerCase().includes("high")) color = "high";
-    else if (out.prediction.toLowerCase().includes("medium")) color = "medium";
-
-    result.innerHTML = `<span class="${color}">Risk: ${out.prediction}</span>`;
-    confidence.innerText =
-      "Confidence: " + (out.confidence * 100).toFixed(2) + "%";
-
-  } catch (err) {
-    error.innerText = "🚨 Server error. Try again.";
-    console.log(err);
+  if (!res.ok) {
+    console.log(out);
+    error.innerText = "❌ Invalid input";
+    return;
   }
+
+  let color = "low";
+  if (out.prediction.toLowerCase().includes("high")) color = "high";
+  else if (out.prediction.toLowerCase().includes("medium")) color = "medium";
+
+  result.innerHTML = `<span class="${color}">${out.prediction}</span>`;
+  confidence.innerText =
+    "Confidence: " + (out.confidence * 100).toFixed(2) + "%";
 }
 </script>
 
