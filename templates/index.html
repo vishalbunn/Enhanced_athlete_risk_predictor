@@ -14,7 +14,7 @@
     h1 {
       text-align: center;
       margin-top: 30px;
-      font-size: 2.8rem;
+      font-size: 2.5rem;
       background: linear-gradient(90deg, #38bdf8, #22c55e);
       -webkit-background-clip: text;
       color: transparent;
@@ -47,7 +47,7 @@
     }
 
     label {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       opacity: 0.7;
     }
 
@@ -60,10 +60,8 @@
       outline: none;
       background: rgba(255,255,255,0.08);
       color: white;
-    }
-
-    input:focus, select:focus {
-      box-shadow: 0 0 10px #38bdf8;
+   08);
+      color: white;
     }
 
     button {
@@ -76,12 +74,6 @@
       background: linear-gradient(135deg, #22c55e, #4ade80);
       color: white;
       cursor: pointer;
-      transition: 0.3s;
-    }
-
-    button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 20px rgba(34,197,94,0.6);
     }
 
     .result-card {
@@ -91,7 +83,6 @@
       padding: 25px;
       border-radius: 18px;
       background: rgba(255,255,255,0.06);
-      backdrop-filter: blur(12px);
     }
 
     .low { color: #22c55e; }
@@ -205,34 +196,46 @@ async function predict() {
 
   error.innerText = "";
 
+  // ✅ strict validation
   for (let key in data) {
-    if (data[key] === "" || isNaN(data[key]) && typeof data[key] === "number") {
-      error.innerText = "⚠️ Fill all fields correctly";
+    if (data[key] === "" || data[key] === null || data[key] === undefined) {
+      error.innerText = `⚠️ Missing: ${key}`;
+      return;
+    }
+
+    if (typeof data[key] === "number" && isNaN(data[key])) {
+      error.innerText = `⚠️ Invalid number: ${key}`;
       return;
     }
   }
 
-  const res = await fetch(window.location.origin + "/predict", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(data)
-  });
+  try {
+    const res = await fetch(window.location.origin + "/predict", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(data)
+    });
 
-  const out = await res.json();
+    const out = await res.json();
 
-  if (!res.ok) {
-    console.log(out);
-    error.innerText = "❌ Invalid input";
-    return;
+    if (!res.ok) {
+      console.log("Backend error:", out);
+      error.innerText = "❌ Backend validation failed (check console)";
+      return;
+    }
+
+    let color = "low";
+    if (out.prediction.toLowerCase().includes("high")) color = "high";
+    else if (out.prediction.toLowerCase().includes("medium")) color = "medium";
+
+    result.innerHTML = `<span class="${color}">Risk: ${out.prediction}</span>`;
+    confidence.innerText =
+      "Confidence: " + (out.confidence * 100).toFixed(2) + "%";
+
+  } catch (err) {
+    console.log(err);
+    error.innerText = "🚨 Server error";
   }
-
-  let color = "low";
-  if (out.prediction.toLowerCase().includes("high")) color = "high";
-  else if (out.prediction.toLowerCase().includes("medium")) color = "medium";
-
-  result.innerHTML = `<span class="${color}">${out.prediction}</span>`;
-  confidence.innerText =
-    "Confidence: " + (out.confidence * 100).toFixed(2) + "%";
 }
 </script>
 
