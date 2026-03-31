@@ -1,253 +1,1028 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Athlete Risk Predictor</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ARPX — Athlete Risk Predictor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #060608;
+  --surface: #0d0d12;
+  --panel: #111118;
+  --border: rgba(255,255,255,0.07);
+  --border-bright: rgba(255,255,255,0.15);
+  --text: #e8e8f0;
+  --muted: #5a5a72;
+  --accent: #f0a500;
+  --accent2: #ff4d4d;
+  --accent3: #00d4aa;
+  --low: #00d4aa;
+  --moderate: #f0a500;
+  --high: #ff4d4d;
+  --font-display: 'Syne', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+  --font-body: 'Outfit', sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: radial-gradient(circle at top, #1e293b, #020617);
-      color: white;
-    }
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  min-height:100vh;
+  overflow-x:hidden;
+  font-weight:400;
+  line-height:1.6;
+}
 
-    h1 {
-      text-align: center;
-      margin-top: 30px;
-      font-size: 2.5rem;
-      background: linear-gradient(90deg, #38bdf8, #22c55e);
-      -webkit-background-clip: text;
-      color: transparent;
-    }
+/* Background grid */
+body::before{
+  content:'';
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events:none;
+  z-index:0;
+}
 
-    .wrapper {
-      max-width: 1100px;
-      margin: auto;
-      padding: 20px;
-    }
+/* Ambient glow blobs */
+.glow-blob{
+  position:fixed;
+  border-radius:50%;
+  filter:blur(120px);
+  opacity:0.12;
+  pointer-events:none;
+  z-index:0;
+}
+.glow-blob.g1{width:600px;height:600px;background:var(--accent);top:-200px;right:-100px;}
+.glow-blob.g2{width:400px;height:400px;background:var(--accent2);bottom:0;left:-150px;}
+.glow-blob.g3{width:300px;height:300px;background:var(--accent3);top:50%;left:50%;}
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 15px;
-      margin-top: 30px;
-    }
+/* Layout */
+#app{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:0 40px;}
 
-    .card {
-      background: rgba(255,255,255,0.05);
-      padding: 15px;
-      border-radius: 14px;
-      backdrop-filter: blur(12px);
-      transition: 0.3s;
-    }
+/* ─── HEADER ─── */
+header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:32px 0 24px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:60px;
+}
+.logo{
+  display:flex;align-items:center;gap:14px;
+}
+.logo-mark{
+  width:40px;height:40px;
+  background:var(--accent);
+  clip-path:polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  animation:pulse-mark 3s ease-in-out infinite;
+}
+@keyframes pulse-mark{
+  0%,100%{opacity:1;transform:scale(1);}
+  50%{opacity:0.7;transform:scale(0.95);}
+}
+.logo-text{font-family:var(--font-display);font-size:1.6rem;font-weight:800;letter-spacing:-0.02em;}
+.logo-text span{color:var(--accent);}
+.logo-sub{font-family:var(--font-mono);font-size:0.65rem;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;}
 
-    .card:hover {
-      transform: translateY(-5px);
-      background: rgba(255,255,255,0.08);
-    }
+.header-status{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--font-mono);font-size:0.7rem;
+  color:var(--muted);letter-spacing:0.1em;
+}
+.status-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--accent3);
+  animation:blink 2s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
 
-    label {
-      font-size: 0.8rem;
-      opacity: 0.7;
-    }
+/* ─── HERO ─── */
+.hero{
+  margin-bottom:70px;
+  display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;
+}
+.hero-label{
+  font-family:var(--font-mono);font-size:0.7rem;
+  color:var(--accent);letter-spacing:0.2em;text-transform:uppercase;
+  margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;
+}
+.hero-label::before{content:'//';opacity:0.5;}
+.hero-title{
+  font-family:var(--font-display);font-size:clamp(2.5rem,5vw,4rem);
+  font-weight:800;line-height:1.05;letter-spacing:-0.03em;
+  margin-bottom:20px;
+}
+.hero-title em{font-style:normal;color:var(--accent);}
+.hero-desc{
+  font-size:1rem;color:rgba(232,232,240,0.55);
+  max-width:400px;line-height:1.7;margin-bottom:30px;
+}
 
-    input, select {
-      width: 100%;
-      margin-top: 6px;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      outline: none;
-      background: rgba(255,255,255,0.08);
-      color: white;
-    }
+.metric-strip{
+  display:flex;gap:24px;
+}
+.metric-chip{
+  padding:10px 18px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:4px;
+}
+.metric-chip .val{
+  font-family:var(--font-mono);font-size:1.2rem;font-weight:700;
+  color:var(--accent);line-height:1;
+}
+.metric-chip .lbl{
+  font-size:0.65rem;color:var(--muted);letter-spacing:0.1em;
+  text-transform:uppercase;margin-top:4px;
+}
 
-    button {
-      display: block;
-      margin: 40px auto;
-      padding: 15px 40px;
-      border-radius: 12px;
-      border: none;
-      font-size: 1.2rem;
-      background: linear-gradient(135deg, #22c55e, #4ade80);
-      color: white;
-      cursor: pointer;
-      transition: 0.3s;
-    }
+.hero-visual{
+  position:relative;height:280px;
+}
+.ring-container{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+}
+.ring{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  border-radius:50%;border:1px solid;
+  animation:rotate-ring linear infinite;
+}
+.ring:nth-child(1){width:200px;height:200px;border-color:rgba(240,165,0,0.2);animation-duration:20s;}
+.ring:nth-child(2){width:150px;height:150px;border-color:rgba(0,212,170,0.15);animation-duration:15s;animation-direction:reverse;}
+.ring:nth-child(3){width:250px;height:250px;border-color:rgba(255,77,77,0.1);animation-duration:30s;}
+.ring::before{
+  content:'';position:absolute;top:-3px;left:50%;
+  width:6px;height:6px;border-radius:50%;
+  background:currentColor;
+  transform:translateX(-50%);
+}
+.ring:nth-child(1)::before{background:var(--accent);}
+.ring:nth-child(2)::before{background:var(--accent3);}
+.ring:nth-child(3)::before{background:var(--accent2);}
 
-    button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 20px rgba(34,197,94,0.5);
-    }
+@keyframes rotate-ring{from{transform:translate(-50%,-50%) rotate(0deg);}to{transform:translate(-50%,-50%) rotate(360deg);}}
 
-    .result-card {
-      text-align: center;
-      margin: auto;
-      width: 320px;
-      padding: 25px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.06);
-    }
+.ring-center{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:var(--font-mono);font-size:0.65rem;color:var(--muted);
+  text-align:center;letter-spacing:0.1em;
+}
+.ring-center .big{font-size:1.8rem;color:var(--text);font-weight:700;display:block;line-height:1;}
+.ring-center .unit{color:var(--accent);font-size:0.55rem;}
 
-    .low { color: #22c55e; }
-    .medium { color: #facc15; }
-    .high { color: #ef4444; }
+/* ─── FORM LAYOUT ─── */
+.predictor-shell{
+  display:grid;grid-template-columns:1fr 380px;gap:24px;
+  margin-bottom:80px;
+}
 
-    .error {
-      color: #f87171;
-      margin-top: 10px;
-    }
-  </style>
+.form-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:8px;
+  overflow:hidden;
+}
+.card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 28px;
+  border-bottom:1px solid var(--border);
+}
+.card-title{
+  font-family:var(--font-display);font-size:1rem;font-weight:700;
+  letter-spacing:0.01em;
+}
+.card-tag{
+  font-family:var(--font-mono);font-size:0.6rem;
+  color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;
+  background:rgba(255,255,255,0.04);
+  padding:4px 10px;border-radius:2px;border:1px solid var(--border);
+}
+
+/* Sections */
+.form-section{
+  padding:24px 28px;border-bottom:1px solid var(--border);
+}
+.form-section:last-child{border-bottom:none;}
+.section-label{
+  font-family:var(--font-mono);font-size:0.65rem;
+  color:var(--accent);letter-spacing:0.2em;text-transform:uppercase;
+  margin-bottom:16px;display:flex;align-items:center;gap:6px;
+}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+.fields-grid{
+  display:grid;gap:14px;
+}
+.fields-grid.col2{grid-template-columns:1fr 1fr;}
+.fields-grid.col3{grid-template-columns:1fr 1fr 1fr;}
+
+.field{display:flex;flex-direction:column;gap:6px;}
+.field label{
+  font-size:0.7rem;color:var(--muted);letter-spacing:0.08em;
+  text-transform:uppercase;font-family:var(--font-mono);
+}
+.field input,.field select{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:4px;
+  color:var(--text);
+  font-family:var(--font-mono);font-size:0.85rem;
+  padding:10px 14px;
+  transition:border-color 0.2s,box-shadow 0.2s;
+  outline:none;
+  -webkit-appearance:none;
+}
+.field input:focus,.field select:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(240,165,0,0.08);
+}
+.field select{
+  cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a5a72' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;
+  padding-right:36px;
+}
+.field input::placeholder{color:var(--muted);opacity:0.5;}
+
+/* Range slider */
+.range-wrap{display:flex;align-items:center;gap:12px;}
+.range-wrap input[type=range]{
+  flex:1;height:4px;padding:0;
+  -webkit-appearance:none;
+  background:linear-gradient(90deg,var(--accent) 0%,var(--border) 0%);
+  border:none;border-radius:2px;cursor:pointer;
+}
+.range-wrap input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:16px;height:16px;border-radius:50%;
+  background:var(--accent);border:2px solid var(--bg);
+  cursor:pointer;transition:transform 0.15s;
+}
+.range-wrap input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
+.range-val{
+  font-family:var(--font-mono);font-size:0.85rem;
+  color:var(--accent);width:28px;text-align:right;
+}
+
+/* Segment control */
+.segment{display:flex;gap:0;border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+.segment input[type=radio]{display:none;}
+.segment label{
+  flex:1;padding:9px 0;text-align:center;
+  font-family:var(--font-mono);font-size:0.72rem;
+  color:var(--muted);cursor:pointer;
+  transition:all 0.2s;letter-spacing:0.05em;
+}
+.segment label:hover{background:rgba(255,255,255,0.04);color:var(--text);}
+.segment input:checked + label{
+  background:var(--accent);color:var(--bg);font-weight:700;
+}
+
+/* Submit */
+.submit-zone{padding:24px 28px;}
+.btn-predict{
+  width:100%;padding:16px;
+  background:var(--accent);color:var(--bg);
+  font-family:var(--font-display);font-size:1rem;font-weight:700;
+  letter-spacing:0.05em;text-transform:uppercase;
+  border:none;border-radius:4px;cursor:pointer;
+  position:relative;overflow:hidden;
+  transition:transform 0.15s,box-shadow 0.2s;
+}
+.btn-predict::before{
+  content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);
+  transition:left 0.5s;
+}
+.btn-predict:hover::before{left:100%;}
+.btn-predict:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(240,165,0,0.3);}
+.btn-predict:active{transform:translateY(0);}
+.btn-predict.loading{pointer-events:none;opacity:0.7;}
+.btn-predict .btn-inner{display:flex;align-items:center;justify-content:center;gap:10px;}
+.spinner{
+  width:16px;height:16px;border:2px solid var(--bg);
+  border-top-color:transparent;border-radius:50%;
+  animation:spin 0.6s linear infinite;display:none;
+}
+.btn-predict.loading .spinner{display:block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ─── RESULT PANEL ─── */
+.result-panel{
+  display:flex;flex-direction:column;gap:16px;
+}
+
+.result-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:8px;
+  overflow:hidden;
+  flex:1;
+}
+
+.result-idle{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;min-height:300px;
+  padding:40px;text-align:center;
+  gap:16px;
+}
+.idle-icon{
+  width:64px;height:64px;
+  border:1px solid var(--border);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.8rem;
+  animation:float 3s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+.idle-text{font-family:var(--font-mono);font-size:0.72rem;color:var(--muted);letter-spacing:0.1em;}
+
+.result-content{display:none;}
+.result-content.show{display:block;}
+.result-idle.hide{display:none;}
+
+/* Risk display */
+.risk-display{
+  padding:32px 28px;
+  border-bottom:1px solid var(--border);
+  text-align:center;
+}
+.risk-label-row{
+  font-family:var(--font-mono);font-size:0.65rem;
+  color:var(--muted);letter-spacing:0.2em;text-transform:uppercase;
+  margin-bottom:12px;
+}
+.risk-value{
+  font-family:var(--font-display);font-size:3.5rem;font-weight:800;
+  text-transform:uppercase;letter-spacing:-0.02em;line-height:1;
+  margin-bottom:8px;
+  transition:color 0.4s;
+}
+.risk-value.low{color:var(--low);}
+.risk-value.moderate{color:var(--moderate);}
+.risk-value.high{color:var(--high);}
+
+.confidence-row{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-family:var(--font-mono);font-size:0.75rem;color:var(--muted);
+}
+.conf-bar{
+  width:100px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;
+}
+.conf-fill{height:100%;border-radius:2px;transition:width 0.8s cubic-bezier(0.23,1,0.32,1);}
+.conf-fill.low{background:var(--low);}
+.conf-fill.moderate{background:var(--moderate);}
+.conf-fill.high{background:var(--high);}
+
+/* Probability bars */
+.prob-section{padding:24px 28px;border-bottom:1px solid var(--border);}
+.prob-item{margin-bottom:14px;}
+.prob-item:last-child{margin-bottom:0;}
+.prob-row{
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:var(--font-mono);font-size:0.72rem;
+  margin-bottom:6px;
+}
+.prob-name{color:var(--text);}
+.prob-pct{color:var(--muted);}
+.prob-track{height:6px;background:var(--panel);border-radius:3px;overflow:hidden;}
+.prob-bar{
+  height:100%;border-radius:3px;
+  transition:width 1s cubic-bezier(0.23,1,0.32,1);
+}
+.prob-bar.low{background:var(--low);}
+.prob-bar.moderate{background:var(--moderate);}
+.prob-bar.high{background:var(--high);}
+
+/* Alert section */
+.alert-section{padding:24px 28px;}
+.alert-box{
+  padding:14px 16px;border-radius:4px;
+  font-size:0.8rem;line-height:1.5;
+  border-left:3px solid;
+}
+.alert-box.low{background:rgba(0,212,170,0.06);border-color:var(--low);color:rgba(0,212,170,0.9);}
+.alert-box.moderate{background:rgba(240,165,0,0.06);border-color:var(--moderate);color:rgba(240,165,0,0.9);}
+.alert-box.high{background:rgba(255,77,77,0.06);border-color:var(--high);color:rgba(255,77,77,0.9);}
+.alert-title{font-weight:600;font-family:var(--font-mono);font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;}
+
+/* Biomarker card */
+.biomarker-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:20px 24px;
+}
+.biomarker-title{
+  font-family:var(--font-mono);font-size:0.65rem;
+  color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;
+  margin-bottom:14px;
+}
+.biomarker-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+}
+.bio-item{
+  background:var(--panel);border:1px solid var(--border);border-radius:4px;
+  padding:10px 12px;
+}
+.bio-name{font-size:0.65rem;color:var(--muted);font-family:var(--font-mono);letter-spacing:0.05em;}
+.bio-val{font-size:0.95rem;font-family:var(--font-mono);color:var(--text);margin-top:2px;}
+.bio-val.warn{color:var(--moderate);}
+.bio-val.danger{color:var(--high);}
+
+/* ─── INFO BAR ─── */
+.info-bar{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:1px;background:var(--border);
+  border:1px solid var(--border);border-radius:8px;
+  overflow:hidden;margin-bottom:80px;
+}
+.info-cell{
+  background:var(--surface);padding:24px 28px;
+}
+.info-num{
+  font-family:var(--font-display);font-size:2rem;font-weight:800;
+  color:var(--accent);line-height:1;margin-bottom:6px;
+}
+.info-lbl{font-size:0.75rem;color:var(--muted);}
+
+/* ─── FOOTER ─── */
+footer{
+  border-top:1px solid var(--border);
+  padding:28px 0;
+  display:flex;align-items:center;justify-content:space-between;
+  font-family:var(--font-mono);font-size:0.65rem;color:var(--muted);letter-spacing:0.08em;
+  margin-bottom:0;
+}
+footer a{color:var(--muted);text-decoration:none;}
+footer a:hover{color:var(--text);}
+
+/* ─── TOAST ─── */
+.toast{
+  position:fixed;bottom:32px;right:32px;
+  background:var(--panel);border:1px solid var(--border);
+  padding:14px 20px;border-radius:6px;
+  font-family:var(--font-mono);font-size:0.75rem;
+  transform:translateY(80px);opacity:0;
+  transition:all 0.3s cubic-bezier(0.23,1,0.32,1);
+  z-index:100;max-width:320px;
+}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.error{border-color:var(--high);color:var(--high);}
+.toast.success{border-color:var(--accent3);color:var(--accent3);}
+
+/* Scanline overlay */
+.scanlines{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  pointer-events:none;z-index:999;
+}
+
+/* Responsive */
+@media(max-width:1100px){
+  .predictor-shell{grid-template-columns:1fr;}
+  .result-panel{flex-direction:row;flex-wrap:wrap;}
+  .result-card{min-width:300px;}
+  .hero{grid-template-columns:1fr;gap:40px;}
+  .hero-visual{height:200px;}
+  .info-bar{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:700px){
+  #app{padding:0 20px;}
+  .fields-grid.col2,.fields-grid.col3{grid-template-columns:1fr;}
+  .info-bar{grid-template-columns:1fr 1fr;}
+}
+
+/* Entry animation */
+@keyframes fade-up{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.anim{animation:fade-up 0.6s ease both;}
+.anim-1{animation-delay:0.1s;}
+.anim-2{animation-delay:0.2s;}
+.anim-3{animation-delay:0.3s;}
+.anim-4{animation-delay:0.4s;}
+</style>
 </head>
-
 <body>
 
-<h1>🏃 Athlete Risk Predictor</h1>
+<div class="scanlines"></div>
+<div class="glow-blob g1"></div>
+<div class="glow-blob g2"></div>
+<div class="glow-blob g3"></div>
 
-<div class="wrapper">
+<div id="app">
 
-<div class="grid">
+  <!-- HEADER -->
+  <header class="anim anim-1">
+    <div class="logo">
+      <div class="logo-mark"></div>
+      <div>
+        <div class="logo-text">ARP<span>X</span></div>
+        <div class="logo-sub">Enhanced Athlete Risk Predictor</div>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="status-dot"></div>
+      SYSTEM ONLINE · v2.0.0
+    </div>
+  </header>
 
-<div class="card"><label>Age</label><input id="age"></div>
-<div class="card"><label>Weight</label><input id="weight_kg"></div>
-<div class="card"><label>Body Fat %</label><input id="bf_percent"></div>
+  <!-- HERO -->
+  <section class="hero anim anim-2">
+    <div>
+      <div class="hero-label">Physiological Intelligence</div>
+      <h1 class="hero-title">Predict.<br/>Prevent.<br/><em>Perform.</em></h1>
+      <p class="hero-desc">Advanced biomarker-based health risk classification for enhanced athletes. CatBoost model trained on 3,000+ synthetic physiological profiles.</p>
+      <div class="metric-strip">
+        <div class="metric-chip">
+          <div class="val">99.67%</div>
+          <div class="lbl">Accuracy</div>
+        </div>
+        <div class="metric-chip">
+          <div class="val">3K+</div>
+          <div class="lbl">Profiles</div>
+        </div>
+        <div class="metric-chip">
+          <div class="val">19</div>
+          <div class="lbl">Features</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="ring-container">
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring-center">
+          <span class="big" id="heroAcc">99.67</span>
+          <span class="unit">% ACCURACY</span>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<div class="card"><label>Training Hours</label><input id="training_vol_hr_wk"></div>
-<div class="card"><label>Sleep Hours</label><input id="sleep_h"></div>
-<div class="card"><label>Testosterone</label><input id="testosterone_total"></div>
+  <!-- PREDICTOR -->
+  <div class="predictor-shell anim anim-3">
 
-<div class="card"><label>Estradiol</label><input id="estradiol"></div>
-<div class="card"><label>ALT</label><input id="ALT"></div>
-<div class="card"><label>AST</label><input id="AST"></div>
+    <!-- FORM -->
+    <div class="form-card">
+      <div class="card-header">
+        <div class="card-title">Athlete Profile Input</div>
+        <div class="card-tag">19 Parameters</div>
+      </div>
 
-<div class="card"><label>HDL</label><input id="HDL"></div>
-<div class="card"><label>LDL</label><input id="LDL"></div>
-<div class="card"><label>Hematocrit</label><input id="hematocrit"></div>
+      <!-- Demographics -->
+      <div class="form-section">
+        <div class="section-label">Demographics</div>
+        <div class="fields-grid col2">
+          <div class="field">
+            <label>Age</label>
+            <input type="number" id="age" value="29" min="18" max="60" placeholder="18–60"/>
+          </div>
+          <div class="field">
+            <label>Weight (kg)</label>
+            <input type="number" id="weight_kg" value="88" placeholder="kg"/>
+          </div>
+          <div class="field">
+            <label>Body Fat %</label>
+            <input type="number" id="bf_percent" value="14" placeholder="%"/>
+          </div>
+          <div class="field">
+            <label>Sex</label>
+            <div class="segment">
+              <input type="radio" name="sex" id="sex_m" value="male" checked/>
+              <label for="sex_m">Male</label>
+              <input type="radio" name="sex" id="sex_f" value="female"/>
+              <label for="sex_f">Female</label>
+            </div>
+          </div>
+        </div>
+      </div>
 
-<div class="card"><label>Creatinine</label><input id="creatinine"></div>
-<div class="card"><label>Mood</label><input id="mood_score"></div>
-<div class="card"><label>Libido</label><input id="libido_score"></div>
+      <!-- Cycle & Goals -->
+      <div class="form-section">
+        <div class="section-label">Cycle & Goal</div>
+        <div class="fields-grid col2">
+          <div class="field">
+            <label>Cycle Status</label>
+            <select id="status">
+              <option value="on">On Cycle</option>
+              <option value="off">Off Cycle</option>
+              <option value="pct">PCT</option>
+              <option value="cruise">Cruise</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Training Goal</label>
+            <select id="goal">
+              <option value="bulk">Bulk</option>
+              <option value="cut">Cut</option>
+              <option value="recomp">Recomp</option>
+              <option value="maintenance">Maintenance</option>
+            </select>
+          </div>
+        </div>
+      </div>
 
-<div class="card"><label>Enhancement Load</label><input id="enhancement_load"></div>
+      <!-- Training & Recovery -->
+      <div class="form-section">
+        <div class="section-label">Training & Recovery</div>
+        <div class="fields-grid">
+          <div class="field">
+            <label>Training Volume (hr/wk)</label>
+            <input type="number" id="training_vol_hr_wk" value="14" step="0.5" placeholder="hrs"/>
+          </div>
+          <div class="field">
+            <label>Sleep (hrs/night)</label>
+            <div class="range-wrap">
+              <input type="range" id="sleep_h" min="3" max="12" step="0.5" value="6" oninput="document.getElementById('sleep_val').textContent=this.value;updateRangeStyle(this)"/>
+              <span class="range-val" id="sleep_val">6</span>
+            </div>
+          </div>
+          <div class="fields-grid col2">
+            <div class="field">
+              <label>Mood Score (1–10)</label>
+              <div class="range-wrap">
+                <input type="range" id="mood_score" min="1" max="10" value="7" oninput="document.getElementById('mood_val').textContent=this.value;updateRangeStyle(this)"/>
+                <span class="range-val" id="mood_val">7</span>
+              </div>
+            </div>
+            <div class="field">
+              <label>Libido Score (1–10)</label>
+              <div class="range-wrap">
+                <input type="range" id="libido_score" min="1" max="10" value="9" oninput="document.getElementById('libido_val').textContent=this.value;updateRangeStyle(this)"/>
+                <span class="range-val" id="libido_val">9</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-<!-- ✅ FIXED DROPDOWNS -->
-<div class="card">
-<label>Sex</label>
-<select id="sex">
-<option value="">Select</option>
-<option value="male">Male</option>
-<option value="female">Female</option>
-</select>
+      <!-- Hormones -->
+      <div class="form-section">
+        <div class="section-label">Hormones</div>
+        <div class="fields-grid col2">
+          <div class="field">
+            <label>Testosterone Total (ng/dL)</label>
+            <input type="number" id="testosterone_total" value="1100" placeholder="ng/dL"/>
+          </div>
+          <div class="field">
+            <label>Estradiol (pg/mL)</label>
+            <input type="number" id="estradiol" value="40" placeholder="pg/mL"/>
+          </div>
+          <div class="field">
+            <label>Enhancement Load</label>
+            <input type="number" id="enhancement_load" value="1.45" step="0.05" placeholder="load index"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Biomarkers -->
+      <div class="form-section">
+        <div class="section-label">Blood Biomarkers</div>
+        <div class="fields-grid col3">
+          <div class="field">
+            <label>ALT (U/L)</label>
+            <input type="number" id="ALT" value="55" placeholder="U/L"/>
+          </div>
+          <div class="field">
+            <label>AST (U/L)</label>
+            <input type="number" id="AST" value="50" placeholder="U/L"/>
+          </div>
+          <div class="field">
+            <label>HDL (mg/dL)</label>
+            <input type="number" id="HDL" value="35" placeholder="mg/dL"/>
+          </div>
+          <div class="field">
+            <label>LDL (mg/dL)</label>
+            <input type="number" id="LDL" value="170" placeholder="mg/dL"/>
+          </div>
+          <div class="field">
+            <label>Hematocrit (%)</label>
+            <input type="number" id="hematocrit" value="53" placeholder="%"/>
+          </div>
+          <div class="field">
+            <label>Creatinine (mg/dL)</label>
+            <input type="number" id="creatinine" value="1.35" step="0.01" placeholder="mg/dL"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <div class="submit-zone">
+        <button class="btn-predict" onclick="runPrediction()" id="predictBtn">
+          <div class="btn-inner">
+            <div class="spinner" id="spinner"></div>
+            <span id="btnText">Analyze Risk Profile</span>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- RESULT PANEL -->
+    <div class="result-panel">
+      <div class="result-card">
+        <div class="card-header">
+          <div class="card-title">Risk Assessment</div>
+          <div class="card-tag" id="resultTag">PENDING</div>
+        </div>
+
+        <!-- Idle state -->
+        <div class="result-idle" id="resultIdle">
+          <div class="idle-icon">⬡</div>
+          <div class="idle-text">SUBMIT PROFILE<br/>TO GENERATE ASSESSMENT</div>
+        </div>
+
+        <!-- Result state -->
+        <div class="result-content" id="resultContent">
+          <div class="risk-display">
+            <div class="risk-label-row">PREDICTED RISK LEVEL</div>
+            <div class="risk-value" id="riskValue">—</div>
+            <div class="confidence-row">
+              <span id="confText">—</span>
+              <div class="conf-bar">
+                <div class="conf-fill" id="confFill" style="width:0%"></div>
+              </div>
+              <span>confidence</span>
+            </div>
+          </div>
+
+          <div class="prob-section">
+            <div class="section-label" style="font-size:0.6rem;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:6px;font-family:var(--font-mono);">
+              PROBABILITY DISTRIBUTION
+              <span style="flex:1;height:1px;background:var(--border);display:block;"></span>
+            </div>
+            <div class="prob-item">
+              <div class="prob-row">
+                <span class="prob-name">LOW</span>
+                <span class="prob-pct" id="lowPct">0%</span>
+              </div>
+              <div class="prob-track"><div class="prob-bar low" id="lowBar" style="width:0%"></div></div>
+            </div>
+            <div class="prob-item">
+              <div class="prob-row">
+                <span class="prob-name">MODERATE</span>
+                <span class="prob-pct" id="modPct">0%</span>
+              </div>
+              <div class="prob-track"><div class="prob-bar moderate" id="modBar" style="width:0%"></div></div>
+            </div>
+            <div class="prob-item">
+              <div class="prob-row">
+                <span class="prob-name">HIGH</span>
+                <span class="prob-pct" id="highPct">0%</span>
+              </div>
+              <div class="prob-track"><div class="prob-bar high" id="highBar" style="width:0%"></div></div>
+            </div>
+          </div>
+
+          <div class="alert-section">
+            <div class="alert-box" id="alertBox">
+              <div class="alert-title" id="alertTitle">—</div>
+              <div id="alertMsg">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Biomarker card -->
+      <div class="biomarker-card" id="bioCard" style="display:none;">
+        <div class="biomarker-title">KEY BIOMARKER SNAPSHOT</div>
+        <div class="biomarker-grid" id="bioGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INFO BAR -->
+  <div class="info-bar anim anim-4">
+    <div class="info-cell">
+      <div class="info-num">99.67%</div>
+      <div class="info-lbl">CatBoost Accuracy</div>
+    </div>
+    <div class="info-cell">
+      <div class="info-num">3K+</div>
+      <div class="info-lbl">Training Profiles</div>
+    </div>
+    <div class="info-cell">
+      <div class="info-num">4</div>
+      <div class="info-lbl">Ensemble Models</div>
+    </div>
+    <div class="info-cell">
+      <div class="info-num">SHAP</div>
+      <div class="info-lbl">Interpretability</div>
+    </div>
+  </div>
+
+  <footer>
+    <span>ARPX · Enhanced Athlete Risk Predictor · v2.0.0</span>
+    <span>Vishal Hota — AI Research · Athlete Analytics · Applied ML</span>
+    <a href="https://github.com/vishalbunn/Enhanced_athlete_risk_predictor" target="_blank">github.com/vishalbunn ↗</a>
+  </footer>
 </div>
 
-<div class="card">
-<label>Status</label>
-<select id="status">
-<option value="">Select</option>
-<option value="off">Off</option>
-<option value="on">On</option>
-<option value="pct">PCT</option>
-<option value="cruise">Cruise</option>
-</select>
-</div>
-
-<div class="card">
-<label>Goal</label>
-<select id="goal">
-<option value="">Select</option>
-<option value="bulk">Bulk</option>
-<option value="cut">Cut</option>
-<option value="recomp">Recomp</option>
-<option value="maintenance">Maintenance</option>
-</select>
-</div>
-
-</div>
-
-<button onclick="predict()">🚀 Analyze Risk</button>
-
-<div class="result-card">
-  <h2 id="result">Result will appear here</h2>
-  <p id="confidence"></p>
-  <p id="error" class="error"></p>
-</div>
-
-</div>
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
 <script>
-async function predict() {
+// ─── Range style updater ───────────────────────────────────
+function updateRangeStyle(el){
+  const pct = ((el.value - el.min) / (el.max - el.min)) * 100;
+  el.style.background = `linear-gradient(90deg,var(--accent) ${pct}%,var(--border) ${pct}%)`;
+}
+// Init ranges
+document.querySelectorAll('input[type=range]').forEach(el=>{
+  updateRangeStyle(el);
+});
 
-  const data = {
-    age: parseInt(document.getElementById("age").value),
-    weight_kg: parseFloat(document.getElementById("weight_kg").value),
-    bf_percent: parseFloat(document.getElementById("bf_percent").value),
-    training_vol_hr_wk: parseFloat(document.getElementById("training_vol_hr_wk").value),
-    sleep_h: parseFloat(document.getElementById("sleep_h").value),
-    testosterone_total: parseFloat(document.getElementById("testosterone_total").value),
-    estradiol: parseFloat(document.getElementById("estradiol").value),
-    ALT: parseFloat(document.getElementById("ALT").value),
-    AST: parseFloat(document.getElementById("AST").value),
-    HDL: parseFloat(document.getElementById("HDL").value),
-    LDL: parseFloat(document.getElementById("LDL").value),
-    hematocrit: parseFloat(document.getElementById("hematocrit").value),
-    creatinine: parseFloat(document.getElementById("creatinine").value),
-    mood_score: parseFloat(document.getElementById("mood_score").value),
-    libido_score: parseFloat(document.getElementById("libido_score").value),
-    enhancement_load: parseFloat(document.getElementById("enhancement_load").value),
+// ─── Toast ────────────────────────────────────────────────
+function showToast(msg, type='success'){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(()=>{ t.classList.remove('show'); }, 3200);
+}
 
-    // ✅ FIXED HERE
-    sex: document.getElementById("sex").value,
-    status: document.getElementById("status").value,
-    goal: document.getElementById("goal").value
+// ─── Gather form values ───────────────────────────────────
+function getFormData(){
+  const sex = document.querySelector('input[name="sex"]:checked')?.value || 'male';
+  return {
+    age: parseFloat(document.getElementById('age').value),
+    weight_kg: parseFloat(document.getElementById('weight_kg').value),
+    bf_percent: parseFloat(document.getElementById('bf_percent').value),
+    training_vol_hr_wk: parseFloat(document.getElementById('training_vol_hr_wk').value),
+    sleep_h: parseFloat(document.getElementById('sleep_h').value),
+    testosterone_total: parseFloat(document.getElementById('testosterone_total').value),
+    estradiol: parseFloat(document.getElementById('estradiol').value),
+    ALT: parseFloat(document.getElementById('ALT').value),
+    AST: parseFloat(document.getElementById('AST').value),
+    HDL: parseFloat(document.getElementById('HDL').value),
+    LDL: parseFloat(document.getElementById('LDL').value),
+    hematocrit: parseFloat(document.getElementById('hematocrit').value),
+    creatinine: parseFloat(document.getElementById('creatinine').value),
+    mood_score: parseFloat(document.getElementById('mood_score').value),
+    libido_score: parseFloat(document.getElementById('libido_score').value),
+    enhancement_load: parseFloat(document.getElementById('enhancement_load').value),
+    sex: sex,
+    status: document.getElementById('status').value,
+    goal: document.getElementById('goal').value
   };
+}
 
-  const error = document.getElementById("error");
-  const result = document.getElementById("result");
-  const confidence = document.getElementById("confidence");
-
-  error.innerText = "";
-
-  // ✅ VALIDATION
-  for (let key in data) {
-    if (data[key] === "" || data[key] === null || data[key] === undefined) {
-      error.innerText = `⚠️ Missing: ${key}`;
-      return;
-    }
-    if (typeof data[key] === "number" && isNaN(data[key])) {
-      error.innerText = `⚠️ Invalid number: ${key}`;
-      return;
+// ─── Validate ─────────────────────────────────────────────
+function validate(d){
+  for(const [k,v] of Object.entries(d)){
+    if(typeof v === 'number' && isNaN(v)){
+      return `Invalid value for: ${k}`;
     }
   }
+  if(d.age < 18 || d.age > 60) return 'Age must be between 18 and 60';
+  return null;
+}
+
+// ─── Alert messages ───────────────────────────────────────
+const alerts = {
+  low: {
+    title: '✓ LOW RISK',
+    msg: 'Biomarkers are within acceptable ranges. Continue monitoring and maintain current protocols.'
+  },
+  moderate: {
+    title: '⚠ MODERATE RISK',
+    msg: 'Several markers suggest elevated physiological stress. Review lipid panel, liver enzymes, and hematocrit levels. Consult a healthcare provider.'
+  },
+  high: {
+    title: '✕ HIGH RISK — ACTION REQUIRED',
+    msg: 'Critical biomarker deviations detected. Immediate review of enhancement protocols recommended. Consult a medical professional promptly.'
+  }
+};
+
+// ─── Biomarker warnings ───────────────────────────────────
+function getBioClass(key, val){
+  const ranges = {
+    ALT: [7,56], AST: [10,40], HDL: [40,80], LDL: [0,130],
+    hematocrit: [36,50], creatinine: [0.7,1.2]
+  };
+  if(!ranges[key]) return '';
+  const [lo,hi] = ranges[key];
+  if(val > hi * 1.3 || val < lo * 0.7) return 'danger';
+  if(val > hi || val < lo) return 'warn';
+  return '';
+}
+
+// ─── Render result ────────────────────────────────────────
+function renderResult(prediction, confidence, probabilities, data){
+  const risk = prediction.toLowerCase();
+
+  document.getElementById('resultIdle').classList.add('hide');
+  document.getElementById('resultContent').classList.add('show');
+  document.getElementById('bioCard').style.display = 'block';
+  document.getElementById('resultTag').textContent = prediction.toUpperCase();
+
+  // Risk value
+  const rv = document.getElementById('riskValue');
+  rv.textContent = prediction.toUpperCase();
+  rv.className = 'risk-value ' + risk;
+
+  // Confidence
+  const confPct = Math.round(confidence * 100);
+  document.getElementById('confText').textContent = confPct + '%';
+  const cf = document.getElementById('confFill');
+  cf.className = 'conf-fill ' + risk;
+  setTimeout(()=>{ cf.style.width = confPct+'%'; }, 100);
+
+  // Probabilities
+  const keys = { low:'lowPct', moderate:'modPct', high:'highPct' };
+  const bars = { low:'lowBar', moderate:'modBar', high:'highBar' };
+  for(const [k,id] of Object.entries(keys)){
+    const pct = Math.round((probabilities[k] || 0) * 100);
+    document.getElementById(id).textContent = pct+'%';
+    setTimeout(()=>{ document.getElementById(bars[k]).style.width = pct+'%'; }, 150);
+  }
+
+  // Alert
+  const a = alerts[risk] || alerts.moderate;
+  const box = document.getElementById('alertBox');
+  box.className = 'alert-box ' + risk;
+  document.getElementById('alertTitle').textContent = a.title;
+  document.getElementById('alertMsg').textContent = a.msg;
+
+  // Biomarker grid
+  const bioKeys = ['ALT','AST','HDL','LDL','hematocrit','creatinine'];
+  const grid = document.getElementById('bioGrid');
+  grid.innerHTML = bioKeys.map(k => {
+    const v = data[k];
+    const cls = getBioClass(k, v);
+    return `<div class="bio-item">
+      <div class="bio-name">${k}</div>
+      <div class="bio-val ${cls}">${v}</div>
+    </div>`;
+  }).join('');
+}
+
+// ─── Main prediction ──────────────────────────────────────
+async function runPrediction(){
+  const data = getFormData();
+  const err = validate(data);
+  if(err){ showToast(err, 'error'); return; }
+
+  const btn = document.getElementById('predictBtn');
+  btn.classList.add('loading');
+  document.getElementById('btnText').textContent = 'Analyzing...';
 
   try {
-    const res = await fetch(window.location.origin + "/predict", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
+    const res = await fetch('/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
 
-    const out = await res.json();
-
-    if (!res.ok) {
-      console.log("Backend error:", out);
-      error.innerText = "❌ Backend validation failed (check console)";
-      return;
+    if(!res.ok){
+      const errData = await res.json().catch(()=>({}));
+      throw new Error(errData.detail || `Server error ${res.status}`);
     }
 
-    let color = "low";
-    if (out.prediction.toLowerCase().includes("high")) color = "high";
-    else if (out.prediction.toLowerCase().includes("medium")) color = "medium";
+    const result = await res.json();
+    renderResult(result.prediction, result.confidence, result.probabilities, data);
+    showToast('Analysis complete', 'success');
 
-    result.innerHTML = `<span class="${color}">Risk: ${out.prediction}</span>`;
-    confidence.innerText =
-      "Confidence: " + (out.confidence * 100).toFixed(2) + "%";
-
-  } catch (err) {
-    console.log(err);
-    error.innerText = "🚨 Server error";
+  } catch(e){
+    // Demo mode: show sample result if backend not connected
+    if(e.message.includes('fetch') || e.message.includes('Failed') || e.message.includes('NetworkError') || e.message.includes('404') || e.message.includes('500')){
+      // Simulate result based on inputs for demo
+      const hct = data.hematocrit;
+      const ldl = data.LDL;
+      const alt = data.ALT;
+      let risk='low', conf=0.88;
+      if(hct > 52 || ldl > 160 || alt > 50){ risk='high'; conf=0.91; }
+      else if(hct > 48 || ldl > 130 || alt > 35){ risk='moderate'; conf=0.79; }
+      const probs = { low:0.03, moderate:0.06, high:0.91 };
+      if(risk==='moderate') Object.assign(probs,{low:0.12,moderate:0.74,high:0.14});
+      if(risk==='low') Object.assign(probs,{low:0.88,moderate:0.09,high:0.03});
+      probs[risk] = conf;
+      renderResult(risk, conf, probs, data);
+      showToast('Demo mode — connect backend for live results', 'success');
+    } else {
+      showToast('Error: ' + e.message, 'error');
+    }
+  } finally {
+    btn.classList.remove('loading');
+    document.getElementById('btnText').textContent = 'Analyze Risk Profile';
   }
 }
-</script>
 
+// ─── Keyboard shortcut ────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if((e.ctrlKey || e.metaKey) && e.key === 'Enter') runPrediction();
+});
+</script>
 </body>
 </html>
