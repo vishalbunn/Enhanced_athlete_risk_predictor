@@ -1,0 +1,17 @@
+Case,Age/Sex/Status,P(high) before,P(high) after,CF predicted,Feature,Unit,Original value,CF value,Change,Clinical action
+1,18/male/on,0.967,0.035,moderate,hematocrit,%,53.26,48.822,DOWN 8.3%,Phlebotomy + aspirin + hydration protocol
+1,18/male/on,0.967,0.035,moderate,HDL,mg/dL,31.2,38.826,UP 24.4%,Cardiovascular exercise + omega-3 supplementation
+2,29/male/on,0.981,0.035,moderate,hematocrit,%,58.53,48.316,DOWN 17.5%,Phlebotomy + aspirin + hydration protocol
+2,29/male/on,0.981,0.035,moderate,AST,U/L,46.5,45.616,DOWN 1.9%,Liver recovery — reduce hepatotoxic compounds
+2,29/male/on,0.981,0.035,moderate,enhancement_load,score,1.392,1.398,UP 0.4%,Reduce total PED dose or switch compounds
+3,28/male/on,0.86,0.037,moderate,HDL,mg/dL,29.9,38.127,UP 27.5%,Cardiovascular exercise + omega-3 supplementation
+3,28/male/on,0.86,0.037,moderate,hematocrit,%,50.06,48.223,DOWN 3.7%,Phlebotomy + aspirin + hydration protocol
+4,18/male/on,0.999,0.066,moderate,hematocrit,%,58.82,46.626,DOWN 20.7%,Phlebotomy + aspirin + hydration protocol
+4,18/male/on,0.999,0.066,moderate,enhancement_load,score,1.331,1.137,DOWN 14.6%,Reduce total PED dose or switch compounds
+4,18/male/on,0.999,0.066,moderate,HDL,mg/dL,33.5,42.238,UP 26.1%,Cardiovascular exercise + omega-3 supplementation
+4,18/male/on,0.999,0.066,moderate,sleep_h,hours,6.34,6.38,UP 0.6%,Lifestyle modification
+5,32/male/on,0.99,0.07,moderate,hematocrit,%,57.25,48.2,DOWN 15.8%,Phlebotomy + aspirin + hydration protocol
+5,32/male/on,0.99,0.07,moderate,HDL,mg/dL,36.6,39.118,UP 6.9%,Cardiovascular exercise + omega-3 supplementation
+5,32/male/on,0.99,0.07,moderate,mood_score,/10,8.16,8.083,DOWN 0.9%,Lifestyle modification
+5,32/male/on,0.99,0.07,moderate,testosterone_total,ng/dL,739.4,750.549,UP 1.5%,Dose reduction or transition to cruise
+5,32/male/on,0.99,0.07,moderate,ALT,U/L,55.71,55.29,DOWN 0.8%,Hepatoprotective protocol / reduce oral AAS

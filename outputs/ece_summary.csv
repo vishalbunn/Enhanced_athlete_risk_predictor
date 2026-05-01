@@ -1,0 +1,13 @@
+Model,Class,ECE,Brier Score
+CatBoost,high,0.0184,0.027
+CatBoost,low,0.0251,0.0289
+CatBoost,moderate,0.0324,0.0561
+XGBoost,high,0.0207,0.0281
+XGBoost,low,0.0316,0.0315
+XGBoost,moderate,0.043,0.0597
+LightGBM,high,0.0354,0.0354
+LightGBM,low,0.0294,0.0263
+LightGBM,moderate,0.0612,0.0617
+MLP,high,0.0346,0.0334
+MLP,low,0.0632,0.0752
+MLP,moderate,0.0921,0.1087

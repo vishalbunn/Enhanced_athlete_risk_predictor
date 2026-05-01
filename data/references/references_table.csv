@@ -1,0 +1,36 @@
+Feature,Population,N,Mean,SD,Source,Notes
+Testosterone (ng/dL),Our synthetic dataset (all),3000,760.8,296.3,This work,"Mixed male/female, all cycle phases"
+Testosterone (ng/dL),Our synthetic dataset (male),2555,761.0,297.7,This work,Male subset only
+Testosterone (ng/dL),general male 18 40,~varies,630.0,200.0,"Bhasin et al. 2010, NEJM",Normal range: 300–1000
+Testosterone (ng/dL),general male 40 65,~varies,490.0,180.0,"Bhasin et al. 2010, NEJM",Normal range: 200–900
+Testosterone (ng/dL),general female 18 40,~varies,35.0,18.0,"Bhasin et al. 2010, NEJM",Normal range: 10–80
+Testosterone (ng/dL),enhanced male on cycle,~varies,1100.0,280.0,"Handelsman et al. 2014, JCEM",Normal range: 500–2000
+Hematocrit (%),Our synthetic dataset (all),3000,46.8,6.6,This work,"Mixed male/female, all cycle phases"
+Hematocrit (%),Our synthetic dataset (male),2555,46.6,6.6,This work,Male subset only
+Hematocrit (%),general male,~varies,46.0,3.5,"Stout et al. 2017, JAGS",Normal range: 38.3–51.0
+Hematocrit (%),general female,~varies,40.5,3.0,"Stout et al. 2017, JAGS",Normal range: 35.5–44.9
+Hematocrit (%),enhanced male,~varies,50.5,4.5,Stout et al. 2017 + clinical estimate,Normal range: 42.0–58.0
+ALT (U/L),Our synthetic dataset (all),3000,34.6,10.8,This work,"Mixed male/female, all cycle phases"
+ALT (U/L),Our synthetic dataset (male),2555,34.5,10.9,This work,Male subset only
+ALT (U/L),general male,~varies,27.0,12.0,"Prati et al. 2002, Ann Intern Med",Normal range: 7–56
+ALT (U/L),general female,~varies,22.0,10.0,"Prati et al. 2002, Ann Intern Med",Normal range: 7–40
+ALT (U/L),enhanced athlete est,~varies,38.0,12.0,Clinical estimate — AAS hepatotoxicity,Normal range: 15–80
+AST (U/L),Our synthetic dataset (all),3000,31.5,9.3,This work,"Mixed male/female, all cycle phases"
+AST (U/L),Our synthetic dataset (male),2555,31.5,9.4,This work,Male subset only
+AST (U/L),general male,~varies,25.0,10.0,"Prati et al. 2002, Ann Intern Med",Normal range: 10–40
+AST (U/L),general female,~varies,22.0,9.0,"Prati et al. 2002, Ann Intern Med",Normal range: 10–36
+AST (U/L),enhanced athlete est,~varies,32.0,10.0,Clinical estimate — AAS hepatotoxicity,Normal range: 12–60
+HDL Cholesterol (mg/dL),Our synthetic dataset (all),3000,45.4,11.3,This work,"Mixed male/female, all cycle phases"
+HDL Cholesterol (mg/dL),Our synthetic dataset (male),2555,45.3,11.3,This work,Male subset only
+HDL Cholesterol (mg/dL),general male nhanes,"6,738",47.0,13.0,NHANES 2017-2018 (males),Normal range: 40.0–70.0
+HDL Cholesterol (mg/dL),general female nhanes,"6,738",58.0,14.0,NHANES 2017-2018 (females),Normal range: 50.0–80.0
+HDL Cholesterol (mg/dL),enhanced male est,~varies,38.0,11.0,Lippi et al. 2011 — AAS lipid effects,Normal range: 25.0–55.0
+LDL Cholesterol (mg/dL),Our synthetic dataset (all),3000,125.3,27.9,This work,"Mixed male/female, all cycle phases"
+LDL Cholesterol (mg/dL),Our synthetic dataset (male),2555,125.2,27.7,This work,Male subset only
+LDL Cholesterol (mg/dL),general population,~varies,115.0,35.0,"Grundy et al. 2018, Circulation",Normal range: 70–160
+LDL Cholesterol (mg/dL),enhanced athlete est,~varies,135.0,30.0,Lippi et al. 2011 — AAS lipid effects,Normal range: 80–200
+Creatinine (mg/dL),Our synthetic dataset (all),3000,1.1,1.0,This work,"Mixed male/female, all cycle phases"
+Creatinine (mg/dL),Our synthetic dataset (male),2555,1.1,1.0,This work,Male subset only
+Creatinine (mg/dL),general male,~varies,0.98,0.17,"Levey et al. 2009, Ann Intern Med",Normal range: 0.74–1.35
+Creatinine (mg/dL),general female,~varies,0.76,0.14,"Levey et al. 2009, Ann Intern Med",Normal range: 0.59–1.04
+Creatinine (mg/dL),enhanced athlete est,~varies,1.1,0.25,Clinical estimate — high protein + AAS,Normal range: 0.7–1.8

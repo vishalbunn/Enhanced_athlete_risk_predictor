@@ -1,0 +1,4 @@
+alpha,target_coverage,empirical_coverage,coverage_satisfied,avg_set_size,singleton_rate,doubleton_rate,empty_rate,q_hat,n_cal
+0.1,0.9,0.92,True,0.9844,0.9844,0.0,0.0156,0.4688,300
+0.05,0.95,0.9578,True,1.1044,0.8956,0.1044,0.0,0.7069,300
+0.01,0.99,0.9978,True,1.3289,0.6711,0.3289,0.0,0.922,300

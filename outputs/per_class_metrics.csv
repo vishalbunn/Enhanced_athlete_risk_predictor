@@ -1,0 +1,13 @@
+Model,Class,Precision,Recall,F1-Score,Support
+CatBoost,high,0.7381,0.8378,0.7848,37
+CatBoost,low,0.9625,0.9706,0.9665,238
+CatBoost,moderate,0.9226,0.8857,0.9038,175
+XGBoost,high,0.7895,0.8108,0.8,37
+XGBoost,low,0.9742,0.9538,0.9639,238
+XGBoost,moderate,0.8994,0.92,0.9096,175
+LightGBM,high,0.7647,0.7027,0.7324,37
+LightGBM,low,0.9787,0.9664,0.9725,238
+LightGBM,moderate,0.895,0.9257,0.9101,175
+MLP,high,0.7568,0.7568,0.7568,37
+MLP,low,0.8952,0.9328,0.9136,238
+MLP,moderate,0.8485,0.8,0.8235,175

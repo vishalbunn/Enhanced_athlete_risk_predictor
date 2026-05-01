@@ -1,0 +1,6 @@
+Model,CV Accuracy (mean),CV Accuracy (±std),CV Macro-F1 (mean),CV Macro-F1 (±std),Test Accuracy,Test Macro-F1,Test AUC-ROC
+CatBoost,94.84%,±1.17%,94.81%,±1.17%,92.67%,88.50%,0.9867
+XGBoost,95.36%,±1.06%,95.34%,±1.07%,92.89%,89.12%,0.9845
+LightGBM,95.68%,±0.71%,95.65%,±0.72%,92.89%,87.17%,0.9872
+MLP,91.43%,±0.80%,91.40%,±0.80%,86.67%,83.13%,0.9649
+MLP (no StandardScaler — ablation),—,—,—,—,76.22%,70.36%,—

@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ARPX — Enhanced Athlete Risk Predictor v2.1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #060608;
+  --surface: #0d0d12;
+  --panel: #111118;
+  --panel-2: #16161e;
+  --border: rgba(255,255,255,0.07);
+  --border-bright: rgba(255,255,255,0.15);
+  --text: #e8e8f0;
+  --muted: #5a5a72;
+  --accent: #f0a500;
+  --accent2: #ff4d4d;
+  --accent3: #00d4aa;
+  --low: #00d4aa;
+  --moderate: #f0a500;
+  --high: #ff4d4d;
+  --font-display: 'Syne', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+  --font-body: 'Outfit', sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--text);font-family:var(--font-body);
+  min-height:100vh;overflow-x:hidden;font-weight:400;line-height:1.6;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 60px 60px;pointer-events:none;z-index:0;
+}
+.glow-blob{position:fixed;border-radius:50%;filter:blur(120px);opacity:0.12;pointer-events:none;z-index:0;}
+.glow-blob.g1{width:600px;height:600px;background:var(--accent);top:-200px;right:-100px;}
+.glow-blob.g2{width:400px;height:400px;background:var(--accent2);bottom:0;left:-150px;}
+.glow-blob.g3{width:300px;height:300px;background:var(--accent3);top:50%;left:50%;}
+#app{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:0 40px;}
+
+/* ─── HEADER ─── */
+header{display:flex;align-items:center;justify-content:space-between;padding:32px 0 24px;border-bottom:1px solid var(--border);margin-bottom:50px;}
+.logo{display:flex;align-items:center;gap:14px;}
+.logo-mark{width:40px;height:40px;background:var(--accent);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);animation:pulse-mark 3s ease-in-out infinite;}
+@keyframes pulse-mark{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.7;transform:scale(0.95);}}
+.logo-text{font-family:var(--font-display);font-size:1.6rem;font-weight:800;letter-spacing:-0.02em;}
+.logo-text span{color:var(--accent);}
+.logo-sub{font-family:var(--font-mono);font-size:0.65rem;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;}
+.header-status{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:0.7rem;color:var(--muted);letter-spacing:0.1em;}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--accent3);animation:blink 2s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+/* ─── HERO (honest numbers) ─── */
+.hero{margin-bottom:60px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+.hero-label{font-family:var(--font-mono);font-size:0.7rem;color:var(--accent);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.hero-label::before{content:'//';opacity:0.5;}
+.hero-title{font-family:var(--font-display);font-size:clamp(2.2rem,4.5vw,3.6rem);font-weight:800;line-height:1.05;letter-spacing:-0.03em;margin-bottom:18px;}
+.hero-title em{font-style:normal;color:var(--accent);}
+.hero-desc{font-size:0.95rem;color:rgba(232,232,240,0.55);max-width:440px;line-height:1.7;margin-bottom:26px;}
+.metric-strip{display:flex;gap:14px;flex-wrap:wrap;}
+.metric-chip{padding:12px 16px;background:var(--panel);border:1px solid var(--border);border-radius:4px;min-width:120px;}
+.metric-chip .val{font-family:var(--font-mono);font-size:1.15rem;font-weight:700;color:var(--accent);line-height:1;}
+.metric-chip .lbl{font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:5px;}
+.metric-chip.coverage .val{color:var(--accent3);}
+.hero-visual{position:relative;height:280px;}
+.ring-container{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
+.ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;border:1px solid;animation:rotate-ring linear infinite;}
+.ring:nth-child(1){width:200px;height:200px;border-color:rgba(240,165,0,0.2);animation-duration:20s;}
+.ring:nth-child(2){width:150px;height:150px;border-color:rgba(0,212,170,0.15);animation-duration:15s;animation-direction:reverse;}
+.ring:nth-child(3){width:250px;height:250px;border-color:rgba(255,77,77,0.1);animation-duration:30s;}
+.ring::before{content:'';position:absolute;top:-3px;left:50%;width:6px;height:6px;border-radius:50%;background:currentColor;transform:translateX(-50%);}
+.ring:nth-child(1)::before{background:var(--accent);}
+.ring:nth-child(2)::before{background:var(--accent3);}
+.ring:nth-child(3)::before{background:var(--accent2);}
+@keyframes rotate-ring{from{transform:translate(-50%,-50%) rotate(0deg);}to{transform:translate(-50%,-50%) rotate(360deg);}}
+.ring-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--font-mono);font-size:0.65rem;color:var(--muted);text-align:center;letter-spacing:0.1em;}
+.ring-center .big{font-size:1.6rem;color:var(--text);font-weight:700;display:block;line-height:1;}
+.ring-center .unit{color:var(--accent);font-size:0.55rem;}
+
+/* ─── FORM LAYOUT ─── */
+.predictor-shell{display:grid;grid-template-columns:1fr 400px;gap:24px;margin-bottom:60px;}
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:18px 26px;border-bottom:1px solid var(--border);}
+.card-title{font-family:var(--font-display);font-size:1rem;font-weight:700;}
+.card-tag{font-family:var(--font-mono);font-size:0.6rem;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;background:rgba(255,255,255,0.04);padding:4px 10px;border-radius:2px;border:1px solid var(--border);}
+.form-section{padding:22px 26px;border-bottom:1px solid var(--border);}
+.form-section:last-child{border-bottom:none;}
+.section-label{font-family:var(--font-mono);font-size:0.64rem;color:var(--accent);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.fields-grid{display:grid;gap:12px;}
+.fields-grid.col2{grid-template-columns:1fr 1fr;}
+.fields-grid.col3{grid-template-columns:1fr 1fr 1fr;}
+.field{display:flex;flex-direction:column;gap:6px;}
+.field label{font-size:0.68rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;font-family:var(--font-mono);}
+.field input,.field select{
+  background:var(--panel);border:1px solid var(--border);border-radius:4px;color:var(--text);
+  font-family:var(--font-mono);font-size:0.85rem;padding:10px 14px;
+  transition:border-color 0.2s,box-shadow 0.2s;outline:none;
+  -webkit-appearance:none;appearance:none;
+}
+.field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(240,165,0,0.08);}
+.field select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a5a72' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
+.field input::placeholder{color:var(--muted);opacity:0.5;}
+
+/* range slider */
+.range-wrap{display:flex;align-items:center;gap:12px;}
+.range-wrap input[type=range]{flex:1;height:4px;padding:0;-webkit-appearance:none;appearance:none;background:linear-gradient(90deg,var(--accent) 0%,var(--border) 0%);border:none;border-radius:2px;cursor:pointer;}
+.range-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);cursor:pointer;transition:transform 0.15s;}
+.range-wrap input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
+.range-val{font-family:var(--font-mono);font-size:0.85rem;color:var(--accent);width:28px;text-align:right;}
+
+/* segment */
+.segment{display:flex;gap:0;border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+.segment input[type=radio]{display:none;}
+.segment label{flex:1;padding:9px 0;text-align:center;font-family:var(--font-mono);font-size:0.7rem;color:var(--muted);cursor:pointer;transition:all 0.2s;letter-spacing:0.05em;}
+.segment label:hover{background:rgba(255,255,255,0.04);color:var(--text);}
+.segment input:checked + label{background:var(--accent);color:var(--bg);font-weight:700;}
+
+/* submit */
+.submit-zone{padding:22px 26px;}
+.btn-predict{width:100%;padding:15px;background:var(--accent);color:var(--bg);font-family:var(--font-display);font-size:0.95rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;border:none;border-radius:4px;cursor:pointer;position:relative;overflow:hidden;transition:transform 0.15s,box-shadow 0.2s;}
+.btn-predict::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);transition:left 0.5s;}
+.btn-predict:hover::before{left:100%;}
+.btn-predict:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(240,165,0,0.3);}
+.btn-predict:active{transform:translateY(0);}
+.btn-predict.loading{pointer-events:none;opacity:0.7;}
+.btn-predict .btn-inner{display:flex;align-items:center;justify-content:center;gap:10px;}
+.spinner{width:16px;height:16px;border:2px solid var(--bg);border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite;display:none;}
+.btn-predict.loading .spinner{display:block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ─── RESULT PANEL ─── */
+.result-panel{display:flex;flex-direction:column;gap:14px;}
+.result-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+
+.result-idle{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:340px;padding:40px;text-align:center;gap:16px;}
+.idle-icon{width:60px;height:60px;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.6rem;animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+.idle-text{font-family:var(--font-mono);font-size:0.72rem;color:var(--muted);letter-spacing:0.1em;}
+.result-content{display:none;}
+.result-content.show{display:block;}
+.result-idle.hide{display:none;}
+
+/* risk display */
+.risk-display{padding:26px 24px;border-bottom:1px solid var(--border);text-align:center;}
+.risk-label-row{font-family:var(--font-mono);font-size:0.62rem;color:var(--muted);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:10px;}
+.risk-value{font-family:var(--font-display);font-size:3rem;font-weight:800;text-transform:uppercase;letter-spacing:-0.02em;line-height:1;margin-bottom:8px;transition:color 0.4s;}
+.risk-value.low{color:var(--low);}
+.risk-value.moderate{color:var(--moderate);}
+.risk-value.high{color:var(--high);}
+.confidence-row{display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-mono);font-size:0.72rem;color:var(--muted);}
+.conf-bar{width:100px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.conf-fill{height:100%;border-radius:2px;transition:width 0.8s cubic-bezier(0.23,1,0.32,1);}
+.conf-fill.low{background:var(--low);}
+.conf-fill.moderate{background:var(--moderate);}
+.conf-fill.high{background:var(--high);}
+
+/* NEW: uncertainty band */
+.uncertainty-band{padding:14px 24px;background:var(--panel-2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.uncert-left{display:flex;align-items:center;gap:10px;}
+.uncert-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0;}
+.uncert-icon.confident{background:rgba(0,212,170,0.15);color:var(--accent3);}
+.uncert-icon.uncertain{background:rgba(240,165,0,0.18);color:var(--moderate);}
+.uncert-text{font-family:var(--font-mono);font-size:0.72rem;}
+.uncert-label{color:var(--muted);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:2px;}
+.uncert-body{color:var(--text);}
+.uncert-body strong{color:var(--accent);}
+.coverage-badge{font-family:var(--font-mono);font-size:0.62rem;color:var(--accent3);background:rgba(0,212,170,0.08);padding:4px 9px;border-radius:3px;letter-spacing:0.08em;}
+
+/* probabilities */
+.prob-section{padding:20px 24px;border-bottom:1px solid var(--border);}
+.prob-item{margin-bottom:12px;}
+.prob-item:last-child{margin-bottom:0;}
+.prob-row{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:0.72rem;margin-bottom:5px;}
+.prob-name{color:var(--text);}
+.prob-pct{color:var(--muted);}
+.prob-track{height:6px;background:var(--panel);border-radius:3px;overflow:hidden;}
+.prob-bar{height:100%;border-radius:3px;transition:width 1s cubic-bezier(0.23,1,0.32,1);}
+.prob-bar.low{background:var(--low);}
+.prob-bar.moderate{background:var(--moderate);}
+.prob-bar.high{background:var(--high);}
+
+/* NEW: section titles within cards */
+.mini-section{padding:20px 24px;border-bottom:1px solid var(--border);}
+.mini-section:last-child{border-bottom:none;}
+.mini-title{font-family:var(--font-mono);font-size:0.62rem;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.mini-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* NEW: SHAP drivers */
+.driver-item{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-family:var(--font-mono);font-size:0.72rem;}
+.driver-item:last-child{margin-bottom:0;}
+.driver-name{flex:0 0 135px;color:var(--text);}
+.driver-val{color:var(--muted);font-size:0.66rem;margin-left:4px;}
+.driver-bar-wrap{flex:1;height:5px;background:var(--panel);border-radius:3px;overflow:hidden;position:relative;}
+.driver-bar{height:100%;border-radius:3px;transition:width 0.8s cubic-bezier(0.23,1,0.32,1);}
+.driver-bar.inc{background:var(--high);}
+.driver-bar.dec{background:var(--low);}
+.driver-impact{flex:0 0 55px;text-align:right;font-size:0.68rem;}
+.driver-impact.inc{color:var(--high);}
+.driver-impact.dec{color:var(--low);}
+
+/* NEW: counterfactual card */
+.cf-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.cf-header{padding:16px 22px;background:rgba(0,212,170,0.06);border-bottom:1px solid var(--border);}
+.cf-header-title{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-size:0.95rem;font-weight:700;color:var(--accent3);}
+.cf-header-sub{font-family:var(--font-mono);font-size:0.65rem;color:var(--muted);letter-spacing:0.1em;margin-top:4px;}
+.cf-body{padding:18px 22px;}
+.cf-change{display:grid;grid-template-columns:140px 1fr 80px;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:0.72rem;font-family:var(--font-mono);align-items:center;}
+.cf-change:last-child{border-bottom:none;}
+.cf-feat{color:var(--text);font-weight:500;}
+.cf-arrow{color:var(--muted);}
+.cf-arrow strong{color:var(--accent);}
+.cf-arrow .act{display:block;font-size:0.62rem;color:var(--accent3);margin-top:3px;font-style:italic;}
+.cf-delta{text-align:right;font-weight:700;}
+.cf-delta.dec{color:var(--low);}
+.cf-delta.inc{color:var(--high);}
+.cf-proj{padding:12px 22px 18px;font-family:var(--font-mono);font-size:0.68rem;color:var(--muted);border-top:1px solid var(--border);}
+.cf-proj strong{color:var(--accent3);}
+
+/* biomarker flags — now with range context */
+.biomarker-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;}
+.bio-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:16px 20px;}
+.bio-item{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:10px 12px;}
+.bio-item.flagged{border-color:rgba(240,165,0,0.4);background:rgba(240,165,0,0.04);}
+.bio-name{font-size:0.62rem;color:var(--muted);font-family:var(--font-mono);letter-spacing:0.05em;}
+.bio-val{font-size:0.9rem;font-family:var(--font-mono);color:var(--text);margin-top:2px;}
+.bio-val.warn{color:var(--moderate);}
+.bio-range{font-size:0.58rem;color:var(--muted);font-family:var(--font-mono);margin-top:2px;opacity:0.7;}
+
+/* calibration badge */
+.cal-badge{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:0.66rem;color:var(--accent3);background:rgba(0,212,170,0.08);padding:6px 12px;border-radius:3px;letter-spacing:0.06em;}
+.cal-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--accent3);}
+
+/* honest disclosure */
+.disclosure{padding:14px 22px;background:var(--panel-2);font-family:var(--font-mono);font-size:0.6rem;color:var(--muted);line-height:1.5;border-top:1px solid var(--border);}
+.disclosure::before{content:'ⓘ ';color:var(--accent);}
+
+/* INFO BAR (honest numbers now) */
+.info-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:60px;}
+.info-cell{background:var(--surface);padding:22px 26px;}
+.info-num{font-family:var(--font-display);font-size:1.9rem;font-weight:800;color:var(--accent);line-height:1;margin-bottom:6px;}
+.info-lbl{font-size:0.72rem;color:var(--muted);}
+.info-sub{font-size:0.6rem;color:var(--muted);opacity:0.6;margin-top:3px;font-family:var(--font-mono);}
+
+footer{border-top:1px solid var(--border);padding:26px 0;display:flex;align-items:center;justify-content:space-between;font-family:var(--font-mono);font-size:0.62rem;color:var(--muted);letter-spacing:0.08em;margin-bottom:0;}
+footer a{color:var(--muted);text-decoration:none;}
+footer a:hover{color:var(--text);}
+
+.toast{position:fixed;bottom:32px;right:32px;background:var(--panel);border:1px solid var(--border);padding:14px 20px;border-radius:6px;font-family:var(--font-mono);font-size:0.72rem;transform:translateY(80px);opacity:0;transition:all 0.3s cubic-bezier(0.23,1,0.32,1);z-index:100;max-width:320px;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.error{border-color:var(--high);color:var(--high);}
+.toast.success{border-color:var(--accent3);color:var(--accent3);}
+
+.scanlines{position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:999;}
+
+@media(max-width:1100px){
+  .predictor-shell{grid-template-columns:1fr;}
+  .hero{grid-template-columns:1fr;gap:40px;}
+  .hero-visual{height:200px;}
+  .info-bar{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:700px){
+  #app{padding:0 20px;}
+  .fields-grid.col2,.fields-grid.col3{grid-template-columns:1fr;}
+  .info-bar{grid-template-columns:1fr 1fr;}
+  .cf-change{grid-template-columns:1fr;}
+}
+
+@keyframes fade-up{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.anim{animation:fade-up 0.6s ease both;}
+.anim-1{animation-delay:0.1s;} .anim-2{animation-delay:0.2s;} .anim-3{animation-delay:0.3s;} .anim-4{animation-delay:0.4s;}
+</style>
+</head>
+<body>
+
+<div class="scanlines"></div>
+<div class="glow-blob g1"></div>
+<div class="glow-blob g2"></div>
+<div class="glow-blob g3"></div>
+
+<div id="app">
+
+  <header class="anim anim-1">
+    <div class="logo">
+      <div class="logo-mark"></div>
+      <div>
+        <div class="logo-text">ARP<span>X</span></div>
+        <div class="logo-sub">Enhanced Athlete Risk Predictor · v2.1</div>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="status-dot"></div>
+      SYSTEM ONLINE · v2.1.0
+    </div>
+  </header>
+
+  <!-- HERO — now with honest numbers -->
+  <section class="hero anim anim-2">
+    <div>
+      <div class="hero-label">Physiological Intelligence</div>
+      <h1 class="hero-title">Predict.<br/>Quantify.<br/><em>Prescribe.</em></h1>
+      <p class="hero-desc">CatBoost + conformal prediction + SHAP + counterfactual explanations on 3,000 synthetic physiological profiles. Every prediction comes with a 95% coverage guarantee and actionable clinical guidance.</p>
+      <div class="metric-strip">
+        <div class="metric-chip">
+          <div class="val">94.84%</div>
+          <div class="lbl">CV Accuracy ±1.17%</div>
+        </div>
+        <div class="metric-chip coverage">
+          <div class="val">95.78%</div>
+          <div class="lbl">Conformal Coverage</div>
+        </div>
+        <div class="metric-chip">
+          <div class="val">0.987</div>
+          <div class="lbl">AUC-ROC</div>
+        </div>
+        <div class="metric-chip">
+          <div class="val">0.025</div>
+          <div class="lbl">ECE · calibrated</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="ring-container">
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring-center">
+          <span class="big">94.84</span>
+          <span class="unit">% CV ACC · ±1.17%</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PREDICTOR -->
+  <div class="predictor-shell anim anim-3">
+
+    <!-- FORM -->
+    <div class="form-card">
+      <div class="card-header">
+        <div class="card-title">Athlete Profile Input</div>
+        <div class="card-tag">19 Parameters</div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-label">Demographics</div>
+        <div class="fields-grid col2">
+          <div class="field">
+            <label>Age</label>
+            <input type="number" id="age" value="29" min="18" max="60"/>
+          </div>
+          <div class="field">
+            <label>Weight (kg)</label>
+            <input type="number" id="weight_kg" value="88"/>
+          </div>
+          <div class="field">
+            <label>Body Fat %</label>
+            <input type="number" id="bf_percent" value="14"/>
+          </div>
+          <div class="field">
+            <label>Sex</label>
+            <div class="segment">
+              <input type="radio" name="sex" id="sex_m" value="male" checked/>
+              <label for="sex_m">Male</label>
+              <input type="radio" name="sex" id="sex_f" value="female"/>
+              <label for="sex_f">Female</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-label">Cycle & Goal</div>
+        <div class="fields-grid col2">
+          <div class="field">
+            <label>Cycle Status</label>
+            <select id="status">
+              <option value="on">On Cycle</option>
+              <option value="off">Off Cycle</option>
+              <option value="pct">PCT</option>
+              <option value="cruise">Cruise</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Training Goal</label>
+            <select id="goal">
+              <option value="bulk">Bulk</option>
+              <option value="cut">Cut</option>
+              <option value="recomp">Recomp</option>
+              <option value="maintenance">Maintenance</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-label">Training & Recovery</div>
+        <div class="fields-grid">
+          <div class="field">
+            <label>Training Volume (hr/wk)</label>
+            <input type="number" id="training_vol_hr_wk" value="14" step="0.5"/>
+          </div>
+          <div class="field">
+            <label>Sleep (hrs/night)</label>
+            <div class="range-wrap">
+              <input type="range" id="sleep_h" min="3" max="12" step="0.5" value="6" oninput="document.getElementById('sleep_val').textContent=this.value;updateRangeStyle(this)"/>
+              <span class="range-val" id="sleep_val">6</span>
+            </div>
+          </div>
+          <div class="fields-grid col2">
+            <div class="field">
+              <label>Mood Score (1–10)</label>
+              <div class="range-wrap">
+                <input type="range" id="mood_score" min="1" max="10" value="7" oninput="document.getElementById('mood_val').textContent=this.value;updateRangeStyle(this)"/>
+                <span class="range-val" id="mood_val">7</span>
+              </div>
+            </div>
+            <div class="field">
+              <label>Libido Score (1–10)</label>
+              <div class="range-wrap">
+                <input type="range" id="libido_score" min="1" max="10" value="9" oninput="document.getElementById('libido_val').textContent=this.value;updateRangeStyle(this)"/>
+                <span class="range-val" id="libido_val">9</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-label">Hormones</div>
+        <div class="fields-grid col2">
+          <div class="field">
+            <label>Testosterone Total (ng/dL)</label>
+            <input type="number" id="testosterone_total" value="1100"/>
+          </div>
+          <div class="field">
+            <label>Estradiol (pg/mL)</label>
+            <input type="number" id="estradiol" value="40"/>
+          </div>
+          <div class="field">
+            <label>Enhancement Load</label>
+            <input type="number" id="enhancement_load" value="1.45" step="0.05"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-label">Blood Biomarkers</div>
+        <div class="fields-grid col3">
+          <div class="field"><label>ALT (U/L)</label><input type="number" id="ALT" value="55"/></div>
+          <div class="field"><label>AST (U/L)</label><input type="number" id="AST" value="50"/></div>
+          <div class="field"><label>HDL (mg/dL)</label><input type="number" id="HDL" value="35"/></div>
+          <div class="field"><label>LDL (mg/dL)</label><input type="number" id="LDL" value="170"/></div>
+          <div class="field"><label>Hematocrit (%)</label><input type="number" id="hematocrit" value="53"/></div>
+          <div class="field"><label>Creatinine (mg/dL)</label><input type="number" id="creatinine" value="1.35" step="0.01"/></div>
+        </div>
+      </div>
+
+      <div class="submit-zone">
+        <button class="btn-predict" onclick="runPrediction()" id="predictBtn">
+          <div class="btn-inner">
+            <div class="spinner" id="spinner"></div>
+            <span id="btnText">Analyze Risk Profile</span>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- RESULT PANEL -->
+    <div class="result-panel">
+
+      <!-- MAIN result card -->
+      <div class="result-card">
+        <div class="card-header">
+          <div class="card-title">Risk Assessment</div>
+          <div class="card-tag" id="resultTag">PENDING</div>
+        </div>
+
+        <div class="result-idle" id="resultIdle">
+          <div class="idle-icon">⬡</div>
+          <div class="idle-text">SUBMIT PROFILE<br/>TO GENERATE ASSESSMENT</div>
+        </div>
+
+        <div class="result-content" id="resultContent">
+          <div class="risk-display">
+            <div class="risk-label-row">PREDICTED RISK LEVEL</div>
+            <div class="risk-value" id="riskValue">—</div>
+            <div class="confidence-row">
+              <span id="confText">—</span>
+              <div class="conf-bar"><div class="conf-fill" id="confFill" style="width:0%"></div></div>
+              <span>confidence</span>
+            </div>
+          </div>
+
+          <!-- NEW: uncertainty band -->
+          <div class="uncertainty-band" id="uncertBand">
+            <div class="uncert-left">
+              <div class="uncert-icon" id="uncertIcon">✓</div>
+              <div>
+                <div class="uncert-label">Prediction Set</div>
+                <div class="uncert-body" id="uncertBody">—</div>
+              </div>
+            </div>
+            <div class="coverage-badge" id="coverageBadge">95% COVERAGE</div>
+          </div>
+
+          <div class="prob-section">
+            <div class="mini-title">Probability Distribution</div>
+            <div class="prob-item"><div class="prob-row"><span class="prob-name">LOW</span><span class="prob-pct" id="lowPct">0%</span></div><div class="prob-track"><div class="prob-bar low" id="lowBar"></div></div></div>
+            <div class="prob-item"><div class="prob-row"><span class="prob-name">MODERATE</span><span class="prob-pct" id="modPct">0%</span></div><div class="prob-track"><div class="prob-bar moderate" id="modBar"></div></div></div>
+            <div class="prob-item"><div class="prob-row"><span class="prob-name">HIGH</span><span class="prob-pct" id="highPct">0%</span></div><div class="prob-track"><div class="prob-bar high" id="highBar"></div></div></div>
+          </div>
+
+          <!-- NEW: top risk drivers (SHAP) -->
+          <div class="mini-section">
+            <div class="mini-title">Top Risk Drivers (SHAP)</div>
+            <div id="driversList"></div>
+          </div>
+
+          <!-- calibration badge -->
+          <div class="mini-section">
+            <div class="mini-title">Model Calibration</div>
+            <div class="cal-badge"><div class="dot"></div><span id="calText">ECE 0.025 · Well-calibrated</span></div>
+          </div>
+
+          <div class="disclosure" id="disclosureText">—</div>
+        </div>
+      </div>
+
+      <!-- NEW: counterfactual card (only visible for HIGH risk) -->
+      <div class="cf-card" id="cfCard" style="display:none;">
+        <div class="cf-header">
+          <div class="cf-header-title">↓ What would lower this risk?</div>
+          <div class="cf-header-sub">Minimum-change counterfactual · Wachter et al. 2017</div>
+        </div>
+        <div class="cf-body" id="cfBody"></div>
+        <div class="cf-proj" id="cfProj">—</div>
+      </div>
+
+      <!-- Biomarker card -->
+      <div class="biomarker-card" id="bioCard" style="display:none;">
+        <div class="card-header">
+          <div class="card-title">Biomarker Snapshot</div>
+          <div class="card-tag" id="bioFlagTag">—</div>
+        </div>
+        <div class="bio-grid" id="bioGrid"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Info bar with HONEST numbers -->
+  <div class="info-bar anim anim-4">
+    <div class="info-cell">
+      <div class="info-num">94.84%</div>
+      <div class="info-lbl">CV Accuracy</div>
+      <div class="info-sub">CatBoost · 5-fold · ±1.17%</div>
+    </div>
+    <div class="info-cell">
+      <div class="info-num">95.78%</div>
+      <div class="info-lbl">Conformal Coverage</div>
+      <div class="info-sub">α=0.05 · guaranteed</div>
+    </div>
+    <div class="info-cell">
+      <div class="info-num">0.025</div>
+      <div class="info-lbl">Calibration Error</div>
+      <div class="info-sub">ECE · well-calibrated</div>
+    </div>
+    <div class="info-cell">
+      <div class="info-num">0.84</div>
+      <div class="info-lbl">High-Risk Recall</div>
+      <div class="info-sub">clinical sensitivity</div>
+    </div>
+  </div>
+
+  <footer>
+    <span>ARPX · Enhanced Athlete Risk Predictor · v2.1.0</span>
+    <span>Vishal Hota — AI Research · Applied ML</span>
+    <a href="https://github.com/vishalbunn/Enhanced_athlete_risk_predictor" target="_blank">github.com/vishalbunn ↗</a>
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── Range slider styling ─────────────────────────────────
+function updateRangeStyle(el){
+  const pct = ((el.value - el.min) / (el.max - el.min)) * 100;
+  el.style.background = `linear-gradient(90deg,var(--accent) ${pct}%,var(--border) ${pct}%)`;
+}
+document.querySelectorAll('input[type=range]').forEach(el=>updateRangeStyle(el));
+
+// ─── Toast ────────────────────────────────────────────────
+function showToast(msg, type='success'){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(()=>{ t.classList.remove('show'); }, 3200);
+}
+
+// ─── Gather form values ───────────────────────────────────
+function getFormData(){
+  return {
+    age: parseInt(document.getElementById('age').value),
+    weight_kg: parseFloat(document.getElementById('weight_kg').value),
+    bf_percent: parseFloat(document.getElementById('bf_percent').value),
+    training_vol_hr_wk: parseFloat(document.getElementById('training_vol_hr_wk').value),
+    sleep_h: parseFloat(document.getElementById('sleep_h').value),
+    testosterone_total: parseFloat(document.getElementById('testosterone_total').value),
+    estradiol: parseFloat(document.getElementById('estradiol').value),
+    ALT: parseFloat(document.getElementById('ALT').value),
+    AST: parseFloat(document.getElementById('AST').value),
+    HDL: parseFloat(document.getElementById('HDL').value),
+    LDL: parseFloat(document.getElementById('LDL').value),
+    hematocrit: parseFloat(document.getElementById('hematocrit').value),
+    creatinine: parseFloat(document.getElementById('creatinine').value),
+    mood_score: parseFloat(document.getElementById('mood_score').value),
+    libido_score: parseFloat(document.getElementById('libido_score').value),
+    enhancement_load: parseFloat(document.getElementById('enhancement_load').value),
+    sex: document.querySelector('input[name="sex"]:checked')?.value || 'male',
+    status: document.getElementById('status').value,
+    goal: document.getElementById('goal').value
+  };
+}
+
+// ─── Pretty feature names ─────────────────────────────────
+const FEAT_LABEL = {
+  age: 'Age', weight_kg: 'Weight', bf_percent: 'Body Fat %',
+  training_vol_hr_wk: 'Training Vol', sleep_h: 'Sleep',
+  testosterone_total: 'Testosterone', estradiol: 'Estradiol',
+  ALT: 'ALT', AST: 'AST', HDL: 'HDL', LDL: 'LDL',
+  hematocrit: 'Hematocrit', creatinine: 'Creatinine',
+  mood_score: 'Mood', libido_score: 'Libido',
+  enhancement_load: 'Enh. Load',
+  sex_male:'Sex: M', sex_female:'Sex: F',
+  status_on:'On Cycle', status_off:'Off', status_pct:'PCT', status_cruise:'Cruise',
+  goal_bulk:'Bulk', goal_cut:'Cut', goal_recomp:'Recomp', goal_maintenance:'Maint.'
+};
+
+// ─── Render full v2 response ──────────────────────────────
+function renderResult(r, data){
+  const risk = r.prediction.toLowerCase();
+
+  document.getElementById('resultIdle').classList.add('hide');
+  document.getElementById('resultContent').classList.add('show');
+  document.getElementById('bioCard').style.display = 'block';
+  document.getElementById('resultTag').textContent = r.prediction.toUpperCase();
+
+  // point prediction
+  const rv = document.getElementById('riskValue');
+  rv.textContent = r.prediction.toUpperCase();
+  rv.className = 'risk-value ' + risk;
+
+  const confPct = Math.round(r.confidence * 100);
+  document.getElementById('confText').textContent = confPct + '%';
+  const cf = document.getElementById('confFill');
+  cf.className = 'conf-fill ' + risk;
+  setTimeout(()=>{ cf.style.width = confPct+'%'; }, 100);
+
+  // prediction set
+  const setStr = '{' + r.conformal_set.map(c=>c).join(', ') + '}';
+  const uncertIcon = document.getElementById('uncertIcon');
+  const uncertBody = document.getElementById('uncertBody');
+  if(r.is_uncertain){
+    uncertIcon.textContent = '?';
+    uncertIcon.className = 'uncert-icon uncertain';
+    uncertBody.innerHTML = `UNCERTAIN — <strong>${setStr}</strong> · flag for review`;
+  } else {
+    uncertIcon.textContent = '✓';
+    uncertIcon.className = 'uncert-icon confident';
+    uncertBody.innerHTML = `CONFIDENT — <strong>${setStr}</strong>`;
+  }
+  document.getElementById('coverageBadge').textContent =
+    `${Math.round(r.coverage_guarantee*100)}% COVERAGE · α=0.05`;
+
+  // probabilities
+  const p = r.probabilities;
+  const setProb = (id, barId, val) => {
+    document.getElementById(id).textContent = (val*100).toFixed(1)+'%';
+    setTimeout(()=>{ document.getElementById(barId).style.width = (val*100)+'%'; }, 150);
+  };
+  setProb('lowPct','lowBar', p.low || 0);
+  setProb('modPct','modBar', p.moderate || 0);
+  setProb('highPct','highBar', p.high || 0);
+
+  // SHAP drivers
+  const dl = document.getElementById('driversList');
+  dl.innerHTML = '';
+  const maxImpact = Math.max(...r.top_drivers.map(d=>Math.abs(d.impact)));
+  r.top_drivers.slice(0,5).forEach(d => {
+    const dir = d.direction === 'increases' ? 'inc' : 'dec';
+    const pct = Math.abs(d.impact / maxImpact) * 100;
+    const niceName = FEAT_LABEL[d.feature] || d.feature;
+    const row = document.createElement('div');
+    row.className = 'driver-item';
+    row.innerHTML = `
+      <div class="driver-name">${niceName}<span class="driver-val">${d.value}</span></div>
+      <div class="driver-bar-wrap"><div class="driver-bar ${dir}" style="width:${pct}%"></div></div>
+      <div class="driver-impact ${dir}">${d.impact > 0 ? '+' : ''}${d.impact.toFixed(2)}</div>`;
+    dl.appendChild(row);
+  });
+
+  // counterfactual
+  const cfCard = document.getElementById('cfCard');
+  if(r.counterfactual && r.counterfactual.changes && r.counterfactual.changes.length){
+    cfCard.style.display = 'block';
+    const body = document.getElementById('cfBody');
+    body.innerHTML = '';
+    r.counterfactual.changes.forEach(c => {
+      const delDir = c.delta_pct < 0 ? 'dec' : 'inc';
+      const niceName = FEAT_LABEL[c.feature] || c.feature;
+      const el = document.createElement('div');
+      el.className = 'cf-change';
+      el.innerHTML = `
+        <div class="cf-feat">${niceName}</div>
+        <div class="cf-arrow">${c.before} → <strong>${c.after}</strong>
+          <span class="act">${c.clinical_action}</span></div>
+        <div class="cf-delta ${delDir}">${c.delta_pct > 0 ? '+' : ''}${c.delta_pct}%</div>`;
+      body.appendChild(el);
+    });
+    const proj = r.counterfactual.projected_probability;
+    const success = r.counterfactual.success ? '✓' : '⚠';
+    document.getElementById('cfProj').innerHTML =
+      `${success} Projected P(${r.counterfactual.target_class}) = <strong>${(proj*100).toFixed(1)}%</strong> after these changes`;
+  } else {
+    cfCard.style.display = 'none';
+  }
+
+  // calibration
+  document.getElementById('calText').textContent =
+    `ECE ${r.calibration.ece.toFixed(3)} · Brier ${r.calibration.brier.toFixed(3)} · ${r.calibration.rating}`;
+
+  // disclosure
+  document.getElementById('disclosureText').textContent = r.honest_accuracy_note;
+
+  // biomarkers
+  const flagged = new Set(r.biomarker_flags.map(f => f.feature));
+  const bioKeys = ['ALT','AST','HDL','LDL','hematocrit','creatinine'];
+  const ranges = {
+    ALT:'7-56 U/L', AST:'10-40 U/L', HDL:'40-80 mg/dL',
+    LDL:'0-130 mg/dL', hematocrit:'36-50%', creatinine:'0.7-1.2 mg/dL'
+  };
+  const grid = document.getElementById('bioGrid');
+  grid.innerHTML = bioKeys.map(k => {
+    const v = data[k];
+    const flagged_ = flagged.has(k);
+    return `<div class="bio-item ${flagged_ ? 'flagged' : ''}">
+      <div class="bio-name">${k}</div>
+      <div class="bio-val ${flagged_ ? 'warn' : ''}">${v}</div>
+      <div class="bio-range">${ranges[k] || ''}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('bioFlagTag').textContent = `${flagged.size} FLAGGED`;
+}
+
+// ─── Main prediction ──────────────────────────────────────
+async function runPrediction(){
+  const data = getFormData();
+
+  // basic validation
+  for(const [k,v] of Object.entries(data)){
+    if(typeof v === 'number' && isNaN(v)){
+      showToast(`Invalid: ${k}`, 'error'); return;
+    }
+  }
+
+  const btn = document.getElementById('predictBtn');
+  btn.classList.add('loading');
+  document.getElementById('btnText').textContent = 'Analyzing...';
+
+  try {
+    const res = await fetch('/predict', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    });
+    if(!res.ok){
+      const errData = await res.json().catch(()=>({}));
+      throw new Error(errData.detail || `Server error ${res.status}`);
+    }
+    const result = await res.json();
+    renderResult(result, data);
+    showToast('Analysis complete', 'success');
+  } catch(e){
+    showToast('Error: ' + e.message, 'error');
+    console.error(e);
+  } finally {
+    btn.classList.remove('loading');
+    document.getElementById('btnText').textContent = 'Analyze Risk Profile';
+  }
+}
+
+// keyboard shortcut
+document.addEventListener('keydown', e => {
+  if((e.ctrlKey || e.metaKey) && e.key === 'Enter') runPrediction();
+});
+</script>
+</body>
+</html>
