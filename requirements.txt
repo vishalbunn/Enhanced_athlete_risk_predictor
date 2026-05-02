@@ -1,6 +1,11 @@
-numpy
+fastapi
+uvicorn[standard]
+pydantic
+numpy<2.0
 pandas
 scikit-learn
+scipy
+imbalanced-learn
 xgboost
 lightgbm
 catboost
@@ -8,13 +13,4 @@ shap
 joblib
 matplotlib
 seaborn
-fastapi
-uvicorn
-numpy
-pandas
-scikit-learn
-catboost
-joblib
-xgboost
-lightgbm
 jinja2
