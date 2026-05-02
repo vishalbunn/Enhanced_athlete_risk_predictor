@@ -1,203 +1,187 @@
+# ARPX — Enhanced Athlete Risk Predictor
 
+> Uncertainty-aware, counterfactually explainable risk stratification
+> for pharmacologically enhanced athletes — a medically underserved
+> population whose biomarker profiles fall outside standard clinical
+> reference ranges.
 
-# 🚀 Enhanced Athlete Health Risk Predictor
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Model-CatBoost%20%7C%20XGBoost%20%7C%20LightGBM-blue?style=flat-square" />
-  <img src="https://img.shields.io/badge/Accuracy-99.6%25-green?style=flat-square" />
-  <img src="https://img.shields.io/badge/Dataset-Synthetic%20Enhanced%20Athlete-orange?style=flat-square" />
-  <img src="https://img.shields.io/badge/Status-Active-success?style=flat-square" />
-</p>
-
----
-
-## 📌 Overview
-
-**Enhanced Athlete Health Risk Predictor** is a machine learning system designed to classify **health risk levels** (low, moderate, high) for enhanced athletes based on:
-
-* Training volume
-* Sleep, mood, libido
-* Blood biomarkers
-* Body composition
-* **Cycle phases: on, off, cruise, pct**
-* Fitness goals (bulk, cut, recomp, maintenance)
-
-The dataset is fully synthetic but modeled after real physiological patterns across enhancement phases — an area with almost **no existing research papers**, making this project novel and research-worthy.
-
-The best-performing model (**CatBoost**) achieves:
-
-> **99.67% accuracy** on multi-class classification.
+**🔗 [Live demo](https://enhanced-athlete-risk-predictor.onrender.com)** ·
+**📄 [Paper draft](./paper/main.pdf)** ·
+**📊 [Model card](./MODEL_CARD.md)** ·
+**📁 [Data card](./DATA_CARD.md)**
 
 ---
 
-## 🌐 Repository
+## What this is
 
-**GitHub:** [https://github.com/vishalbunn/Enhanced_athlete_risk_predictor](https://github.com/vishalbunn/Enhanced_athlete_risk_predictor)
+A research framework that does three things existing athlete-monitoring
+ML doesn't:
 
----
+1. **Quantifies its own uncertainty.** Conformal prediction produces
+   prediction *sets* like `{moderate, high}` with a mathematical
+   95% coverage guarantee, instead of a single confident class.
+2. **Tells the user what to change.** Counterfactual explanations
+   identify the minimum biomarker modifications needed to flip a
+   high-risk profile to moderate, mapped to clinical actions.
+3. **Discloses its own limits.** Synthetic-data circularity is
+   acknowledged; an in-progress blind clinician rating study (n=200)
+   provides partial mitigation.
 
-## 🧬 Features
-
-* 3000+ synthetic athlete profiles
-* Multi-class health risk prediction
-* Models: CatBoost, XGBoost, LightGBM, MLP
-* SHAP interpretability
-* Clean modular code (API-ready)
-* Fully reproducible notebook
-* Ideal for research & deployment
-
----
-
-## 📂 Project Structure
-
-```
-Enhanced_athlete_risk_predictor/
-│
-├── data/
-│   └── synthetic_athlete_health_risk.csv
-│
-├── models/
-│   ├── catboost_health_risk_model.pkl
-│   ├── xgboost_health_risk_model.pkl
-│   ├── lightgbm_health_risk_model.pkl
-│   ├── mlp_health_risk_model.pkl
-│   └── le_risk_encoder.pkl
-│
-├── outputs/
-│   └── fig_shap_bar.png
-│
-├── src/
-│   ├── predict.py
-│   ├── utils.py
-│   ├── model_loader.py
-│   └── template_columns.json
-│
-├── notebooks/
-│   └── HealthRiskPredictor.ipynb
-│
-├── README.md
-├── requirements.txt
-└── .gitignore
-```
+The framework is positioned as a harm-reduction instrument, not an
+enforcement tool.
 
 ---
 
-## 🧠 Model Performance
+## Results (honest numbers, sealed test set)
 
-| Model        | Accuracy   |
-| ------------ | ---------- |
-| **CatBoost** | **0.9967** |
-| XGBoost      | 0.9883     |
-| LightGBM     | 0.9866     |
-| MLP          | 0.5616     |
+| Metric                    | Value             | Notes                              |
+|---------------------------|-------------------|------------------------------------|
+| CV accuracy (CatBoost)    | **94.84% ± 1.17%**| 5-fold stratified, SMOTE-balanced  |
+| Held-out test accuracy    | 92.67%            | n=450, never seen during training  |
+| AUC-ROC                   | 0.9867            | one-vs-rest                        |
+| Expected Calibration Error| 0.0253            | well-calibrated (threshold 0.05)   |
+| Conformal coverage @ α=0.05| 95.78% empirical | distribution-free guarantee        |
+| High-risk recall          | 0.838             | clinically critical class          |
+| Counterfactual success    | 100% (5/5 cases)  | minimum-change flip to moderate    |
 
----
-
-## 🎯 Example Prediction
-
-```python
-from src.predict import predict_health_risk_from_dict
-
-case = {
-    "age": 29,
-    "sex": "male",
-    "status": "on",
-    "goal": "bulk",
-    "weight_kg": 88,
-    "bf_percent": 14,
-    "training_vol_hr_wk": 14,
-    "sleep_h": 6,
-    "testosterone_total": 1100,
-    "estradiol": 40,
-    "ALT": 55,
-    "AST": 50,
-    "HDL": 35,
-    "LDL": 170,
-    "hematocrit": 53,
-    "creatinine": 1.35,
-    "mood_score": 7,
-    "libido_score": 9,
-    "enhancement_load": 1.45
-}
-
-label, probs = predict_health_risk_from_dict(case, model_name="catboost")
-
-print("Predicted Risk:", label)
-print("Probabilities:", probs)
-```
-
-### Example Output:
-
-```
-Predicted Risk: high
-Probabilities: {'high': 0.91, 'low': 0.03, 'moderate': 0.06}
-```
+The original v1 of this project reported 99.67% accuracy, which was
+the model recovering the rule that generated the labels (a depth-8
+decision tree achieves 99.97% on the same task by rote memorization).
+v2 dropped that misleading framing and reports the regularized
+performance with explicit circularity disclosure.
 
 ---
 
+## Stack
 
-### Key Influential Biomarkers
-
-* Hematocrit
-* Creatinine
-* LDL/HDL profile
-* ALT & AST (liver markers)
-* Enhancement load
-* Testosterone
-* Cycle status
+| Layer        | Tools                                                |
+|--------------|------------------------------------------------------|
+| ML           | CatBoost, XGBoost, LightGBM, MLP                     |
+| Uncertainty  | Split conformal prediction (LAC nonconformity)       |
+| Explanation  | SHAP TreeExplainer + Wachter et al. counterfactuals  |
+| Backend      | FastAPI + uvicorn                                    |
+| Frontend     | Vanilla HTML/CSS/JS (no framework)                   |
+| Deploy       | Render (free tier, kept warm via UptimeRobot)        |
 
 ---
 
-## 🏗️ Installation
+## Run locally
+
+Requirements: Python 3.11+, ~600MB disk for dependencies.
 
 ```bash
+# 1. Install dependencies
 pip install -r requirements.txt
+
+# 2. Generate the conformal calibration state (one-time)
+python -c "import sys; sys.path.insert(0,'src'); import joblib, pandas as pd, json; from conformal import ConformalPredictor; cal=pd.read_csv('data/splits/calibration.csv'); le=joblib.load('models/le_risk_encoder.pkl'); cols=json.load(open('src/template_columns.json')); F=['age','weight_kg','bf_percent','training_vol_hr_wk','sleep_h','testosterone_total','estradiol','ALT','AST','HDL','LDL','hematocrit','creatinine','mood_score','libido_score','enhancement_load']; Xc=pd.get_dummies(cal[F+['sex','status','goal']]).reindex(columns=cols,fill_value=0).values; yc=le.transform(cal['risk']); model=joblib.load('models/catboost_health_risk_model.pkl'); cp=ConformalPredictor(alpha=0.05); cp.calibrate(model,Xc,yc,le); joblib.dump({'q_hat': float(cp.q_hat), 'alpha': float(cp.alpha), 'classes': list(cp.classes_), 'n_cal': int(cp.n_cal)}, 'models/conformal_state.pkl'); print('done')"
+
+# 3. Launch
+uvicorn app:app --reload --port 8000
+```
+
+Open http://localhost:8000.
+
+---
+
+## Reproducing the experiments
+
+```bash
+# Regenerate the synthetic dataset (3000 samples, seed=42)
+python src/data_generator.py
+
+# Train all 4 classifiers with 5-fold CV
+python src/train.py
+
+# Evaluate calibration
+python src/evaluate.py
+
+# Apply conformal prediction layer
+python src/conformal.py
+
+# Generate counterfactual case studies
+python src/counterfactual.py
+
+# NHANES external validation
+python src/build_references_table.py
+```
+
+All scripts use a fixed seed (42). Outputs are deterministic.
+
+---
+
+## Repository structure
+
+```
+.
+├── app.py                    # FastAPI server
+├── templates/index.html      # Frontend
+├── src/
+│   ├── data_generator.py     # Synthetic dataset construction
+│   ├── train.py              # Model training pipeline
+│   ├── evaluate.py           # Calibration + per-class metrics
+│   ├── conformal.py          # Split conformal prediction
+│   ├── counterfactual.py     # Wachter et al. counterfactuals
+│   ├── audit.py              # v1 dataset forensic audit
+│   └── template_columns.json # Feature column ordering
+├── data/
+│   ├── synthetic_athlete_health_risk_v2.csv
+│   ├── splits/               # train/val/calibration/test
+│   └── references/           # NHANES validation data
+├── models/                   # Trained models + conformal state
+├── outputs/                  # All figures + per-class metrics
+├── paper/                    # LaTeX source + bibliography
+├── MODEL_CARD.md
+├── DATA_CARD.md
+└── requirements.txt
 ```
 
 ---
 
-## 🧩 Using the Prediction API
+## Limitations
 
-```python
-from src.predict import predict_health_risk_from_dict
+Disclosed in the paper (Section VII) and worth surfacing here:
+
+- **Synthetic data only.** No real athlete records. Validation against
+  NHANES marginals is partial.
+- **Label circularity.** Risk labels are a deterministic function of
+  the biomarkers, not clinical adjudication. A blind clinician rating
+  study (n=200) is in progress.
+- **Demographic skew.** ~85% male, US/European reference ranges.
+  South Asian, female, and pediatric athletes need separate
+  recalibration.
+- **Cross-sectional only.** Does not model biomarker trajectories
+  over time. A longitudinal extension is planned future work.
+- **Counterfactuals lack causal realism.** Suggestions assume
+  features can be modified independently; in practice, clinical
+  interventions affect multiple biomarkers simultaneously.
+
+---
+
+## Citation
+
+If this work informs further research, please cite the in-progress
+paper (EMBC 2026 submission):
+
+```
+Hota, V. (2026). Uncertainty-Aware and Counterfactually Explainable
+Risk Stratification for Enhanced Athletes: A Methodological Framework
+on Synthetic Physiological Data. Submitted to IEEE EMBC 2026.
 ```
 
 ---
 
-## 🔬 Research Motivation
+## License
 
-This project contributes to athlete risk analytics by introducing:
-
-* A synthetic physiological model of enhancement phases
-* A biomarker-based risk-scoring algorithm
-* Multi-model benchmarking
-* SHAP interpretability linked to biological reasoning
-
-A formal **research publication** is currently being written based on this work.
+Code: MIT. Synthetic dataset: CC BY-NC-SA 4.0 (research and
+education only; commercial or enforcement use prohibited).
 
 ---
 
-## 🚀 Roadmap
+## Author
 
-* Full research paper (LaTeX)
-* FastAPI + Docker deployment
-* Streamlit dashboard
-* Time-series biomarker forecasting
-* Longitudinal athlete modeling
+**Vishal Hota** — B.Tech CSE (AI/ML), KL University Hyderabad
+Targeting MS programs at Carnegie Mellon, UCLA, Georgia Tech.
 
----
-
-## ⭐ Support
-
-If you find this project valuable, please ⭐ the repository:
-
-**[https://github.com/vishalbunn/Enhanced_athlete_risk_predictor](https://github.com/vishalbunn/Enhanced_athlete_risk_predictor)**
-
----
-
-## 👤 Author
-
-**Vishal Hota**
-AI Research • Athlete Analytics • Applied ML
-
-
+GitHub: [vishalbunn](https://github.com/vishalbunn) ·
+Email: vishalhota9@gmail.com
